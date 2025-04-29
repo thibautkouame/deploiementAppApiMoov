@@ -1,0 +1,42 @@
+name: fitness
+description: A fitness tracking application
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.1.0
+  shared_preferences: ^2.2.0
+  lucide_icons: ^0.257.0
+  video_player: ^2.7.2
+  intl: ^0.18.1
+  fl_chart: ^0.65.0
+  syncfusion_flutter_charts: ^23.1.44
+  flutter_cache_manager: ^3.4.1
+  cached_network_image: ^3.3.1
+  shimmer: ^3.0.0
+  cupertino_icons: ^1.0.2
+  google_fonts: ^6.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/1.png
+    - assets/images/2.png
+    - assets/images/googleImage.png
+    - assets/images/image_01.png
+    - assets/images/man.png
+    - assets/images/woman.png
+    - assets/images/man_level.png
+    - assets/images/woman_level.png
+    - assets/images/profile_image.gif
+    - assets/images/manorwoman.png
