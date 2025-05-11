@@ -42,6 +42,8 @@ class ExerciseDetailScreen extends StatefulWidget {
 class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
   late VideoPlayerController _controller;
   bool _isPlaying = false;
+  bool _isInitialized = false;
+  String? _error;
   int repetitions = 5;
   bool _showValidation = false;
   final TextEditingController _caloriesController = TextEditingController();
@@ -63,12 +65,40 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.networkUrl(
-        Uri.parse(widget.exercise.videoUrl),
-      )
-      ..initialize().then((_) {
-        setState(() {});
+    _initializeVideo();
+  }
+
+  Future<void> _initializeVideo() async {
+    final baseUrl = 'http://192.168.1.5:3000';
+    final videoUrl = '$baseUrl${widget.exercise.videoUrl}';
+    print('DEBUG - URL de la vidéo: $videoUrl');
+
+    try {
+      // Vérifier d'abord si la vidéo est accessible
+      final response = await http.head(Uri.parse(videoUrl));
+      print('DEBUG - Test vidéo - Status: ${response.statusCode}');
+      print('DEBUG - Test vidéo - Headers: ${response.headers}');
+
+      if (response.statusCode != 200) {
+        throw Exception('Vidéo non accessible (${response.statusCode})');
+      }
+
+      _controller = VideoPlayerController.networkUrl(Uri.parse(videoUrl));
+      
+      await _controller.initialize();
+      print('DEBUG - Vidéo initialisée avec succès');
+      print('DEBUG - Durée: ${_controller.value.duration}');
+      print('DEBUG - Taille: ${_controller.value.size}');
+      
+      setState(() {
+        _isInitialized = true;
       });
+    } catch (e) {
+      print('DEBUG - Erreur lors de l\'initialisation: $e');
+      setState(() {
+        _error = e.toString();
+      });
+    }
   }
 
   bool _areAllFieldsFilled() {
@@ -308,41 +338,59 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
     );
   }
 
+  Widget _buildVideoPlayer() {
+    if (_error != null) {
+      return Center(
+        child: Text('Erreur: $_error', style: TextStyle(color: Colors.red)),
+      );
+    }
+
+    if (!_isInitialized) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        AspectRatio(
+          aspectRatio: _controller.value.aspectRatio,
+          child: VideoPlayer(_controller),
+        ),
+        IconButton(
+          icon: Icon(
+            _isPlaying ? Icons.pause_circle : Icons.play_circle,
+            size: 50,
+            color: Colors.white,
+          ),
+          onPressed: () {
+            setState(() {
+              if (_isPlaying) {
+                _controller.pause();
+              } else {
+                _controller.play();
+              }
+              _isPlaying = !_isPlaying;
+            });
+          },
+        ),
+      ],
+    );
+  }
+
   Widget _buildExerciseDetails() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(height: 15),
+        const SizedBox(height: 15),
         AspectRatio(
           aspectRatio: 16 / 9,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                _controller.value.isInitialized
-                    ? VideoPlayer(_controller)
-                    : const Center(child: CircularProgressIndicator()),
-                IconButton(
-                  icon: Icon(
-                    _isPlaying
-                        ? LucideIcons.pauseCircle
-                        : LucideIcons.playCircle,
-                    size: 50,
-                    color: Colors.white,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      if (_isPlaying) {
-                        _controller.pause();
-                      } else {
-                        _controller.play();
-                      }
-                      _isPlaying = !_isPlaying;
-                    });
-                  },
-                ),
-              ],
+            child: Container(
+              color: Colors.black,
+              child: _buildVideoPlayer(),
             ),
           ),
         ),
@@ -725,6 +773,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print('DEBUG - Build appelé');
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(

@@ -15,8 +15,8 @@ class LoginSignupPage extends StatefulWidget {
 
 class _LoginSignupPageState extends State<LoginSignupPage> {
   bool _isSignup = true; // true pour l'inscription, false pour la connexion
-  final _emailController = TextEditingController(text: '');
-  final _passwordController = TextEditingController(text: '');
+  final _emailController = TextEditingController(text: 'deux@gmail.com');
+  final _passwordController = TextEditingController(text: 'nnnnnnnn');
   final _usernameController = TextEditingController();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();

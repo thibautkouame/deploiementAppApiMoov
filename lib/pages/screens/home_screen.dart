@@ -506,7 +506,7 @@ class _HomeContentState extends State<HomeContent> {
               child: Stack(
                 children: [
                   Image.network(
-                    exercise.imageCover,
+                    'http://192.168.1.5:3000${exercise.imageCover}',
                     width: 100,
                     height: 100,
                     fit: BoxFit.cover,

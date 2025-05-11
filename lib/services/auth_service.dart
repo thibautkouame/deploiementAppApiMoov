@@ -4,7 +4,7 @@ import 'package:fitness/models/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  static const String baseUrl = 'http://192.168.1.3:3000/api';
+  static const String baseUrl = 'http://192.168.1.5:3000/api';
   static const String _tokenKey = 'auth_token';
 
   Future<Map<String, dynamic>> signup({
