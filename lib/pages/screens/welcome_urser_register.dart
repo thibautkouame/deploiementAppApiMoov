@@ -374,6 +374,8 @@ class _WelcomeUserRegisterState extends State<WelcomeUserRegister> {
                 },
               ),
             ),
+            const SizedBox(height: 20),
+
           ],
         ),
       ),
@@ -395,91 +397,93 @@ class _WelcomeUserRegisterState extends State<WelcomeUserRegister> {
         ),
       ),
       padding: EdgeInsets.all(10),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16.0),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15.0),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: Image.asset(
+                'assets/images/running_beach.jpg',
+                fit: BoxFit.cover,
+                height: 250,
+                width: double.infinity,
+              ),
             ),
-            clipBehavior: Clip.antiAlias,
-            child: Image.asset(
-              'assets/images/running_beach.jpg',
-              fit: BoxFit.cover,
-              height: 250,
+            const SizedBox(height: 20),
+            const Text(
+              'Récapitulons tes données',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primary,
+              ),
+            ),
+            const SizedBox(height: 40),
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    spreadRadius: 5,
+                    blurRadius: 10,
+                    offset: Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  _buildInfoRow(Icons.person, 'Nom d\'utilisateur',
+                      _userInfo?.username ?? 'Non défini'),
+                  const Divider(height: 20),
+                  _buildInfoRow(Icons.person, 'Sexe', _selectedGender),
+                  const Divider(height: 20),
+                  _buildInfoRow(Icons.calendar_today, 'Age', '$age ans'),
+                  const Divider(height: 20),
+                  _buildInfoRow(Icons.monitor_weight, 'Poids', '$poids kg'),
+                  const Divider(height: 20),
+                  _buildInfoRow(Icons.height, 'Taille', '$taille cm'),
+                  const Divider(height: 20),
+                  _buildInfoRow(Icons.directions_run, 'Activité', activite),
+                  const Divider(height: 20),
+                  _buildInfoRow(Icons.fitness_center, 'Niveau', _selectedLevel),
+                ],
+              ),
+            ),
+            const SizedBox(height: 40),
+            Container(
               width: double.infinity,
-            ),
-          ),
-          const SizedBox(height: 20),
-          const Text(
-            'Récapitulons tes données',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: AppColors.primary,
-            ),
-          ),
-          const SizedBox(height: 40),
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 20),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(15),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
-                  spreadRadius: 5,
-                  blurRadius: 10,
-                  offset: Offset(0, 3),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                _buildInfoRow(Icons.person, 'Nom d\'utilisateur',
-                    _userInfo?.username ?? 'Non défini'),
-                const Divider(height: 20),
-                _buildInfoRow(Icons.person, 'Sexe', _selectedGender),
-                const Divider(height: 20),
-                _buildInfoRow(Icons.calendar_today, 'Age', '$age ans'),
-                const Divider(height: 20),
-                _buildInfoRow(Icons.monitor_weight, 'Poids', '$poids kg'),
-                const Divider(height: 20),
-                _buildInfoRow(Icons.height, 'Taille', '$taille cm'),
-                const Divider(height: 20),
-                _buildInfoRow(Icons.directions_run, 'Activité', activite),
-                const Divider(height: 20),
-                _buildInfoRow(Icons.fitness_center, 'Niveau', _selectedLevel),
-              ],
-            ),
-          ),
-          const SizedBox(height: 40),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              children: [
-                Expanded(
-                  child: ButtonWidget(
-                    text: 'Modifier',
-                    onPressed: () {
-                      _pageController.jumpToPage(0);
-                    },
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ButtonWidget(
+                      text: 'Modifier',
+                      onPressed: () {
+                        _pageController.jumpToPage(0);
+                      },
+                    ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: ButtonWidget(
-                    text: 'Confirmer',
-                    onPressed: _updateUserInfo,
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: ButtonWidget(
+                      text: 'Confirmer',
+                      onPressed: _updateUserInfo,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
