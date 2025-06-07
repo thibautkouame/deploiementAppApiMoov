@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class ButtonWidget extends StatelessWidget {
@@ -10,6 +9,7 @@ class ButtonWidget extends StatelessWidget {
   final BorderRadiusGeometry borderRadius;
   final double fontSize;
   final FontWeight fontWeight;
+  final Color? backgroundColor;
 
   const ButtonWidget({
     super.key,
@@ -21,6 +21,7 @@ class ButtonWidget extends StatelessWidget {
     this.borderRadius = const BorderRadius.all(Radius.circular(8)), // Default border radius
     this.fontSize = 18,
     this.fontWeight = FontWeight.normal,
+    this.backgroundColor,
   });
 
   @override
@@ -31,7 +32,7 @@ class ButtonWidget extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF3AE374),
+          backgroundColor: backgroundColor ?? const Color(0xFF3AE374),
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: borderRadius, // Use the modifiable border radius
@@ -49,4 +50,3 @@ class ButtonWidget extends StatelessWidget {
     );
   }
 }
-

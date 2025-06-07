@@ -1,3 +1,5 @@
+import 'package:fitness/widgets/confirm_message.dart';
+import 'package:fitness/widgets/loading_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:fitness/services/auth_service.dart';
@@ -12,6 +14,8 @@ import 'package:fitness/pages/welcome.dart';
 import 'package:fitness/pages/loginsignup.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+
+import '../../widgets/success_message.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -57,7 +61,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       // Get current user data
       final currentUser = await _userFuture;
-      
+
       // Update profile with new picture
       final updatedUser = await _authService.updateProfile(
         token: token,
@@ -79,33 +83,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _userFuture = Future.value(updatedUser);
       });
 
-     ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                    'Profil mis à jour avec succès.'),
-                TextButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                  },
-                  child: const Text(
-                    'OK',
-                    style: TextStyle(color: Colors.white),
-                  ),
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Profil mis à jour avec succès.'),
+              TextButton(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                },
+                child: const Text(
+                  'OK',
+                  style: TextStyle(color: Colors.white),
                 ),
-              ],
-            ),
-            duration: const Duration(seconds: 2),
-            backgroundColor: AppColors.primary,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            behavior: SnackBarBehavior.floating,
-            margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              ),
+            ],
           ),
-        );
+          duration: const Duration(seconds: 2),
+          backgroundColor: AppColors.primary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        ),
+      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur lors de la mise à jour de la photo: $e')),
@@ -133,7 +136,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       }
 
                       if (snapshot.hasError) {
-                        if (snapshot.error.toString().contains('Token invalide') || snapshot.error.toString().contains('401')) {
+                        if (snapshot.error.toString().contains('Token invalide') ||
+                            snapshot.error.toString().contains('401')) {
                           WidgetsBinding.instance.addPostFrameCallback((_) {
                             Navigator.of(context).pushAndRemoveUntil(
                               MaterialPageRoute(builder: (context) => const LoginSignupPage()),
@@ -197,9 +201,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       child: CircleAvatar(
                                         radius: 50,
                                         backgroundColor: Colors.white,
-                                        backgroundImage: NetworkImage(user.profile_picture != null 
-                                          ? '${AuthService.baseUrlImage}${user.profile_picture}' 
-                                          : 'https://img.freepik.com/premium-vector/collection-3d-sport-icon-collection-isolated-blue-sport-recreation-concept_112554-928.jpg'),
+                                        backgroundImage: NetworkImage(user.profile_picture != null
+                                            ? '${AuthService.baseUrlImage}${user.profile_picture}'
+                                            : 'https://img.freepik.com/premium-vector/collection-3d-sport-icon-collection-isolated-blue-sport-recreation-concept_112554-928.jpg'),
                                       ),
                                     ),
                                     Positioned(
@@ -287,7 +291,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       const SizedBox(height: 10),
                                       GestureDetector(
                                         onTap: () {
-                                           Navigator.push(context, MaterialPageRoute(builder: (context) => ProgressScreen()));
+                                          Navigator.push(
+                                              context, MaterialPageRoute(builder: (context) => ProgressScreen()));
                                         },
                                         child: _buildMenuItem(LucideIcons.pieChart, 'Historique', Colors.pink),
                                       ),
@@ -295,7 +300,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       GestureDetector(
                                         onTap: () {
                                           // Handle 'Progression' tap
-                                          Navigator.push(context, MaterialPageRoute(builder: (context) => StatsScreen()));
+                                          Navigator.push(
+                                              context, MaterialPageRoute(builder: (context) => StatsScreen()));
                                         },
                                         child: _buildMenuItem(LucideIcons.barChartBig, 'Progression', Colors.pink),
                                       ),
@@ -338,9 +344,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     children: [
                                       GestureDetector(
                                         onTap: () {
-                                          Navigator.push(context, MaterialPageRoute(builder: (context) => const EditProfile()));
+                                          Navigator.push(
+                                              context, MaterialPageRoute(builder: (context) => const EditProfile()));
                                         },
                                         child: _buildMenuItem(LucideIcons.settings, 'Paramètres', Colors.pink),
+                                      ),
+                                      const SizedBox(height: 10),
+                                      GestureDetector(
+                                        onTap: () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) => ConfirmMessage(
+                                              message:
+                                                  'Voulez-vous vraiment supprimer votre compte ? Cette action est irréversible.',
+                                              confirmText: "OUI",
+                                              cancelText: "NON",
+                                              onConfirm: () {
+                                                Navigator.pop(context);
+                                                _deleteAccount();
+                                              },
+                                            ),
+                                          );
+                                        },
+                                        child: _buildMenuItem(LucideIcons.trash, 'Supprimer votre compte', Colors.pink,
+                                            textColor: Colors.red),
                                       ),
                                     ],
                                   ),
@@ -356,7 +383,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
 
               // Bottom Navigation
-
             ],
           ),
         ),
@@ -409,7 +435,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-   Widget _buildMenuItem(IconData icon, String title, Color color) {
+  Widget _buildMenuItem(IconData icon, String title, Color color, {Color? textColor}) {
     return Container(
       height: 70,
       color: Colors.white, // Added background color
@@ -420,9 +446,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(width: 16),
           Text(
             title,
-            style: GoogleFonts.poppins(
-              fontSize: 16,
-            ),
+            style: GoogleFonts.poppins(fontSize: 16, color: textColor),
           ),
           const Spacer(),
           const Icon(Icons.chevron_right, color: Colors.grey),
@@ -430,4 +454,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
-} 
+
+  void _deleteAccount() async {
+    showLoadingDialog(context);
+    await Future.delayed(const Duration(seconds: 2));
+    Navigator.pop(context);
+    showDialog(
+        context: context,
+        builder: (context) => SuccessMessage(
+            message:
+                "Votre demande de suppression de compte a bien été prise en\n compte et sera traitée par le service\n client",
+            onContinue: () => Navigator.pop(context)));
+  }
+}
