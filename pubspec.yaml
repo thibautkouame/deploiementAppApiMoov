@@ -23,22 +23,33 @@ dependencies:
   cupertino_icons: ^1.0.2
   google_fonts: ^6.2.1
   webview_flutter: ^4.11.0
+  image_picker: ^1.0.7
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  image_path: "assets/images/logo.png"  
+  android: true 
+  ios: true
+  # image_path_android: "assets/logo_android.png"
+  # image_path_ios: "assets/logo_ios.png"
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
+  change_app_package_name: ^1.4.0
 
 flutter:
   uses-material-design: true
   assets:
     - assets/images/1.png
     - assets/images/2.png
-    - assets/images/googleImage.png
-    - assets/images/image_01.png
+    - assets/images/image_level.jpg
+    - assets/images/logo.png
     - assets/images/man.png
     - assets/images/woman.png
-    - assets/images/man_level.png
-    - assets/images/woman_level.png
-    - assets/images/profile_image.gif
     - assets/images/manorwoman.png
+    - assets/images/randonnee.jpg
+    - assets/images/randonnee_2.jpg
+    - assets/images/ready_to_run.jpg
+    - assets/images/running_beach.jpg

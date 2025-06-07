@@ -19,7 +19,7 @@ class SensationSelect extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      padding: const EdgeInsets.only(top: 15.0, bottom: 4.0, left: 0, right: 0),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -54,6 +54,8 @@ class SensationSelect extends StatelessWidget {
                         'Sélectionner',
                         style: TextStyle(fontSize: 12, color: Colors.black54),
                       ),
+                      dropdownColor: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
                       items: ['Excellent', 'Bon', 'Moyen', 'Mauvais'].map((String value) {
                         return DropdownMenuItem<String>(
                           value: value,

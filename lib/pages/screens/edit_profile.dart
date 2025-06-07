@@ -5,6 +5,8 @@ import 'package:fitness/models/user.dart';
 import 'package:fitness/services/auth_service.dart';
 import 'package:fitness/theme/theme.dart';
 import 'package:fitness/pages/screens/profile_screen.dart';
+import 'package:fitness/pages/welcome.dart';
+import 'package:fitness/pages/loginsignup.dart';
 
 class EditProfile extends StatefulWidget {
   const EditProfile({super.key});
@@ -43,6 +45,12 @@ class _EditProfileState extends State<EditProfile> {
           _error = 'Token manquant';
           _loading = false;
         });
+        if (mounted) {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const LoginSignupPage()),
+            (route) => false,
+          );
+        }
         return;
       }
       final user = await AuthService().getUserInfo(token);
@@ -60,6 +68,14 @@ class _EditProfileState extends State<EditProfile> {
         _error = e.toString();
         _loading = false;
       });
+      if (e.toString().contains('Token invalide') || e.toString().contains('401')) {
+        if (mounted) {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const LoginSignupPage()),
+            (route) => false,
+          );
+        }
+      }
     }
   }
 
@@ -214,7 +230,7 @@ class _EditProfileState extends State<EditProfile> {
                                     controller: _heightController,
                                     keyboardType: TextInputType.number,
                                     decoration: const InputDecoration(
-                                      labelText: 'Taille',
+                                      labelText: 'Taille(cm)',
                                       labelStyle:
                                           TextStyle(color: Colors.black),
                                       suffixText: 'cm',

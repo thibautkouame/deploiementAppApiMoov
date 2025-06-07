@@ -5,6 +5,7 @@ import 'package:fitness/pages/screens/stats_screen.dart';
 import 'package:fitness/pages/screens/analysis_screen.dart';
 import 'package:fitness/pages/screens/profile_screen.dart';
 import 'package:fitness/pages/screens/exercise_detail_screen.dart';
+import 'package:flutter/services.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -15,6 +16,9 @@ import 'package:fitness/widgets/selector_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:fitness/widgets/space_widget.dart';
+import 'package:fitness/pages/loginsignup.dart';
+import 'package:fitness/widgets/bottom_nav_widget.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -33,6 +37,24 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _checkToken();
+  }
+
+  Future<void> _checkToken() async {
+    final token = await AuthService.getToken();
+    if (token == null || token.isEmpty) {
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const LoginSignupPage()),
+          (route) => false,
+        );
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
@@ -40,57 +62,13 @@ class _HomeScreenState extends State<HomeScreen> {
         padding: const EdgeInsets.all(8.0),
         child: _pages[_selectedIndex],
       ),
-      bottomNavigationBar: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        decoration: BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(50),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildNavItem(LucideIcons.home, 'Accueil', 0),
-            _buildNavItem(LucideIcons.rocket, 'Statistiques', 1),
-            _buildNavItem(LucideIcons.barChartBig, 'Analyse', 2),
-            _buildNavItem(LucideIcons.user2, 'Profil', 3),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavItem(IconData icon, String label, int index) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedIndex = index;
-        });
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: _selectedIndex == index ? AppColors.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(15),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              color: _selectedIndex == index ? Colors.black : Colors.white,
-            ),
-            if (_selectedIndex == index) const SizedBox(width: 4),
-            if (_selectedIndex == index)
-              Text(
-                label,
-                style: GoogleFonts.poppins(
-                  color: Colors.black,
-                  fontSize: 12,
-                ),
-              ),
-          ],
-        ),
+      bottomNavigationBar: BottomNavWidget(
+        selectedIndex: _selectedIndex,
+        onItemSelected: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
       ),
     );
   }
@@ -152,6 +130,17 @@ class _HomeContentState extends State<HomeContent> {
   Future<void> _fetchExercises() async {
     try {
       final response = await http.get(Uri.parse('${AuthService.baseUrl}/exercise-types'));
+
+      if (response.statusCode == 401) {
+        await AuthService.removeToken();
+        if (mounted) {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const LoginSignupPage()),
+            (route) => false,
+          );
+        }
+        return;
+      }
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -238,7 +227,7 @@ class _HomeContentState extends State<HomeContent> {
             ),
             Container(
               height: 350,
-              margin: const EdgeInsets.all(16),
+              margin: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -247,7 +236,7 @@ class _HomeContentState extends State<HomeContent> {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(16),
                     child: Image.asset(
-                      'assets/images/image_01.png',
+                      'assets/images/randonnee_2.jpg',
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -257,7 +246,7 @@ class _HomeContentState extends State<HomeContent> {
                     left: 0,
                     right: 0,
                     child: Container(
-                      height: 210,
+                      height: 208,
                       decoration: BoxDecoration(
                         color: Colors.black,
                         borderRadius: BorderRadius.circular(16),
@@ -265,13 +254,13 @@ class _HomeContentState extends State<HomeContent> {
                       child: Column(
                         children: [
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Expanded(child: _buildIndicator('Qté eau', Icons.water_drop, AppColors.primary, 'Litre', _waterLiterController)),
-                                Expanded(child: _buildIndicator('Sommeil', Icons.nightlight_rounded, AppColors.primary, 'Heure', _sleepHoursController)),
-                                Expanded(child: _buildIndicator('Calorie\nAbsorbée', Icons.local_fire_department, AppColors.primary, 'Kcal', _caloriesController)),
+                                Expanded(child: _buildIndicator('Qté eau', 'Litre', _waterLiterController)),
+                                Expanded(child: _buildIndicator('Sommeil', 'Heure', _sleepHoursController)),
+                                Expanded(child: _buildIndicator('Calorie Absorbée', 'Kcal', _caloriesController)),
                               ],
                             ),
                           ),
@@ -281,8 +270,8 @@ class _HomeContentState extends State<HomeContent> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Expanded(child: _buildIndicator('Pression systolique avant', Icons.water_drop, AppColors.primary, 'MmHg', _systolicPressureBeforeController)),
-                                  Expanded(child: _buildIndicator('Pression diastolique avant', Icons.nightlight_rounded, AppColors.primary, 'MmHg', _diastolicPressureBeforeController)),
+                                Expanded(child: _buildIndicator('Pression systolique avant', 'MmHg', _systolicPressureBeforeController)),
+                                  Expanded(child: _buildIndicator('Pression diastolique avant', 'MmHg', _diastolicPressureBeforeController)),
                               ],
                             ),
                           ),
@@ -292,7 +281,7 @@ class _HomeContentState extends State<HomeContent> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Expanded(child: _buildIndicator('Pression\nartérielle avant', Icons.favorite, AppColors.primary, 'MmHg', _bloodPressureController)),
+                                Expanded(child: _buildIndicator('Pression\nartérielle avant', 'MmHg', _bloodPressureController)),
                                 Expanded(
                                   child: Container(
                                     decoration: BoxDecoration(
@@ -313,7 +302,7 @@ class _HomeContentState extends State<HomeContent> {
                                     ),
                                   ),
                                 ),
-                                Expanded(child: _buildIndicator('Frequence\ncardiaque avant', Icons.monitor_heart, AppColors.primary, 'Bpm', _heartRateController)),
+                                Expanded(child: _buildIndicator('Frequence\ncardiaque avant', 'Bpm', _heartRateController)),
                               ],
                             ),
                           ),
@@ -394,7 +383,7 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
-  Widget _buildIndicator(String label, IconData icon, Color color, String placeholder, TextEditingController controller) {
+  Widget _buildIndicator(String label, String placeholder, TextEditingController controller) {
     bool _isFieldEmpty(TextEditingController controller) {
       return controller.text.isEmpty;
     }
@@ -404,14 +393,6 @@ class _HomeContentState extends State<HomeContent> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: Colors.black, size: 20),
-          ),
           const SizedBox(width: 6),
           Expanded(
             child: Column(
@@ -429,10 +410,12 @@ class _HomeContentState extends State<HomeContent> {
                 ),
                 const SizedBox(height: 4),
                 SizedBox(
-                  width: 50,
+                  width: double.infinity,
                   height: 30,
                   child: TextField(
                     controller: controller,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: InputDecoration(
                       contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
                       border: OutlineInputBorder(
@@ -506,7 +489,7 @@ class _HomeContentState extends State<HomeContent> {
               child: Stack(
                 children: [
                   Image.network(
-                    'http://192.168.1.5:3000${exercise.imageCover}',
+                    '${AuthService.baseUrlImage}${exercise.imageCover}',
                     width: 100,
                     height: 100,
                     fit: BoxFit.cover,
@@ -555,7 +538,7 @@ class _HomeContentState extends State<HomeContent> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    exercise.duration,
+                    _formatDuration(exercise.duration),
                     style: GoogleFonts.poppins(
                       fontSize: 12,
                       color: Colors.grey,
@@ -611,5 +594,18 @@ class _HomeContentState extends State<HomeContent> {
         ],
       ),
     );
+  }
+
+  String _formatDuration(String duration) {
+    final parts = duration.split(":");
+    if (parts.length == 2) {
+      final hours = int.tryParse(parts[0]) ?? 0;
+      final minutes = int.tryParse(parts[1]) ?? 0;
+      String result = "";
+      if (hours > 0) result += "${hours}h ";
+      if (minutes > 0 || hours == 0) result += "${minutes}min";
+      return result.trim();
+    }
+    return duration;
   }
 }

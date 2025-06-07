@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:fitness/pages/loginsignup.dart';
+import 'package:fitness/pages/screens/welcome_urser_register.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class WelcomePage extends StatelessWidget {
   const WelcomePage({super.key});
@@ -47,10 +48,12 @@ class WelcomePage extends StatelessWidget {
                   width: 200,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
+                    onPressed: () async {
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setBool('has_seen_welcome', true);
+                      Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (context) => LoginSignupPage()),
+                        MaterialPageRoute(builder: (context) => WelcomeUserRegister()),
                       );
                     },
                     style: ElevatedButton.styleFrom(

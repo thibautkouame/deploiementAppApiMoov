@@ -3,6 +3,7 @@ import 'package:fitness/widgets/space_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:fitness/models/exercise_type.dart';
 import 'package:fitness/theme/theme.dart';
+import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -10,6 +11,11 @@ import 'package:fitness/widgets/selector_widget.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:fitness/services/auth_service.dart';
+import 'package:fitness/widgets/bottom_nav_widget.dart';
+import 'package:fitness/pages/screens/home_screen.dart';
+import 'package:fitness/pages/screens/stats_screen.dart';
+import 'package:fitness/pages/screens/analysis_screen.dart';
+import 'package:fitness/pages/screens/profile_screen.dart';
 
 class ExerciseDetailScreen extends StatefulWidget {
   final ExerciseType exercise;
@@ -23,7 +29,7 @@ class ExerciseDetailScreen extends StatefulWidget {
   final String diastolicPressureBefore;
 
   const ExerciseDetailScreen({
-    super.key, 
+    super.key,
     required this.exercise,
     required this.waterLiter,
     required this.sleepHours,
@@ -52,13 +58,20 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
   final TextEditingController _heartRateController = TextEditingController();
   final TextEditingController _waterLiterController = TextEditingController();
   final TextEditingController _sleepHoursController = TextEditingController();
-  final TextEditingController _caloriesBurnedController = TextEditingController();
-  final TextEditingController _bloodPressureAfterController = TextEditingController();
-  final TextEditingController _heartRateAfterController = TextEditingController();
-  final TextEditingController _systolicPressureBeforeController = TextEditingController();
-  final TextEditingController _diastolicPressureBeforeController = TextEditingController();
-  final TextEditingController _systolicPressureAfterController = TextEditingController();
-  final TextEditingController _diastolicPressureAfterController = TextEditingController();
+  final TextEditingController _caloriesBurnedController =
+      TextEditingController();
+  final TextEditingController _bloodPressureAfterController =
+      TextEditingController();
+  final TextEditingController _heartRateAfterController =
+      TextEditingController();
+  final TextEditingController _systolicPressureBeforeController =
+      TextEditingController();
+  final TextEditingController _diastolicPressureBeforeController =
+      TextEditingController();
+  final TextEditingController _systolicPressureAfterController =
+      TextEditingController();
+  final TextEditingController _diastolicPressureAfterController =
+      TextEditingController();
   String? _sensationAfter;
   String? _sensationDuring;
 
@@ -69,8 +82,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
   }
 
   Future<void> _initializeVideo() async {
-    final baseUrl = 'http://192.168.1.5:3000';
-    final videoUrl = '$baseUrl${widget.exercise.videoUrl}';
+    final videoUrl = '${AuthService.baseUrlImage}${widget.exercise.videoUrl}';
     print('DEBUG - URL de la vidéo: $videoUrl');
 
     try {
@@ -84,12 +96,12 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
       }
 
       _controller = VideoPlayerController.networkUrl(Uri.parse(videoUrl));
-      
+
       await _controller.initialize();
       print('DEBUG - Vidéo initialisée avec succès');
       print('DEBUG - Durée: ${_controller.value.duration}');
       print('DEBUG - Taille: ${_controller.value.size}');
-      
+
       setState(() {
         _isInitialized = true;
       });
@@ -140,7 +152,6 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       ),
-     
     );
   }
 
@@ -153,19 +164,28 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
     // Création de l'objet de données
     final exerciseData = {
       'exercise_type_id': widget.exercise.id,
-      'water_liter': widget.waterLiter.isNotEmpty ? double.parse(widget.waterLiter) : null,
-      'sleep_hours': widget.sleepHours.isNotEmpty ? double.parse(widget.sleepHours) : null,
-      'calories': widget.calories.isNotEmpty ? double.parse(widget.calories) : null,
+      'water_liter':
+          widget.waterLiter.isNotEmpty ? double.parse(widget.waterLiter) : null,
+      'sleep_hours':
+          widget.sleepHours.isNotEmpty ? double.parse(widget.sleepHours) : null,
+      'calories':
+          widget.calories.isNotEmpty ? double.parse(widget.calories) : null,
       'blood_pressure_before': widget.bloodPressureBefore,
       'sensation_before': widget.sensationBefore,
-      'heart_rate_before': widget.heartRateBefore.isNotEmpty ? int.parse(widget.heartRateBefore) : null,
+      'heart_rate_before': widget.heartRateBefore.isNotEmpty
+          ? int.parse(widget.heartRateBefore)
+          : null,
       'duration': widget.exercise.duration,
       'repetition': repetitions,
-      'calories_burned': _caloriesBurnedController.text.isNotEmpty ? double.parse(_caloriesBurnedController.text) : null,
+      'calories_burned': _caloriesBurnedController.text.isNotEmpty
+          ? double.parse(_caloriesBurnedController.text)
+          : null,
       'sensation_after': _sensationAfter,
       'sensation_during': _sensationDuring,
       'blood_pressure_after': _bloodPressureAfterController.text,
-      'heart_rate_after': _heartRateAfterController.text.isNotEmpty ? int.parse(_heartRateAfterController.text) : null,
+      'heart_rate_after': _heartRateAfterController.text.isNotEmpty
+          ? int.parse(_heartRateAfterController.text)
+          : null,
       'systolic_pressure_before': widget.systolicPressureBefore,
       'diastolic_pressure_before': widget.diastolicPressureBefore,
       'systolic_pressure_after': _systolicPressureAfterController.text,
@@ -196,36 +216,37 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
       print('Corps de la réponse: ${response.body}');
 
       if (response.statusCode == 201) {
-       ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text('Votre session d\'entraînement \n a été enregistrée  avec succès.'),
-            TextButton(
-              onPressed: () {
-                ScaffoldMessenger.of(context).hideCurrentSnackBar();
-              },
-              child: const Text(
-                'OK',
-                style: TextStyle(color: Colors.white),
-              ),
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                    'Votre session d\'entraînement \n a été enregistrée  avec succès.'),
+                TextButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  },
+                  child: const Text(
+                    'OK',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-        duration: const Duration(seconds: 2),
-        backgroundColor: AppColors.primary,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      ),
-     
-    );
+            duration: const Duration(seconds: 2),
+            backgroundColor: AppColors.primary,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          ),
+        );
         Navigator.pop(context);
       } else {
-        throw Exception('Failed to save exercise data. Status code: ${response.statusCode}');
+        throw Exception(
+            'Failed to save exercise data. Status code: ${response.statusCode}');
       }
     } catch (e) {
       print('Erreur lors de l\'envoi des données: $e');
@@ -427,24 +448,23 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                         Expanded(
                           child: _buildIndicator(
                             'Calories brulées',
-                            Icons.local_fire_department,
-                            AppColors.primary,
                             'Kcal',
                             _caloriesBurnedController,
                           ),
                         ),
                       ],
                     ),
-                     SpaceWidget.height10,
+                    SpaceWidget.height10,
                     Row(
                       children: [
                         Expanded(
                           child: Container(
                             decoration: BoxDecoration(
                               border: Border.all(
-                                color: _showValidation && _sensationAfter == null 
-                                    ? Colors.red 
-                                    : Colors.transparent,
+                                color:
+                                    _showValidation && _sensationAfter == null
+                                        ? Colors.red
+                                        : Colors.transparent,
                                 width: 2,
                               ),
                               borderRadius: BorderRadius.circular(8),
@@ -454,7 +474,8 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                               labelColor: Colors.black,
                               value: _sensationAfter,
                               labelSize: 11.5,
-                              onChanged: (value) => setState(() => _sensationAfter = value),
+                              onChanged: (value) =>
+                                  setState(() => _sensationAfter = value),
                             ),
                           ),
                         ),
@@ -462,9 +483,10 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                           child: Container(
                             decoration: BoxDecoration(
                               border: Border.all(
-                                color: _showValidation && _sensationDuring == null 
-                                    ? Colors.red 
-                                    : Colors.transparent,
+                                color:
+                                    _showValidation && _sensationDuring == null
+                                        ? Colors.red
+                                        : Colors.transparent,
                                 width: 2,
                               ),
                               borderRadius: BorderRadius.circular(8),
@@ -474,7 +496,8 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                               label: 'Sensation pendant',
                               labelSize: 11.5,
                               value: _sensationDuring,
-                              onChanged: (value) => setState(() => _sensationDuring = value),
+                              onChanged: (value) =>
+                                  setState(() => _sensationDuring = value),
                             ),
                           ),
                         ),
@@ -486,8 +509,6 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                         Expanded(
                           child: _buildIndicator(
                             'Pression artérielle après',
-                            Icons.monitor_heart,
-                            AppColors.primary,
                             'MmHg',
                             _bloodPressureAfterController,
                           ),
@@ -496,8 +517,6 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                         Expanded(
                           child: _buildIndicator(
                             'Fréquence cardique après',
-                            LucideIcons.heart,
-                            AppColors.primary,
                             'Bpm',
                             _heartRateAfterController,
                           ),
@@ -510,8 +529,6 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                         Expanded(
                           child: _buildIndicator(
                             'Pression systolique après',
-                            Icons.monitor_heart,
-                            AppColors.primary,
                             'MmHg',
                             _systolicPressureAfterController,
                           ),
@@ -520,8 +537,6 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                         Expanded(
                           child: _buildIndicator(
                             'Pression diastolique après',
-                            LucideIcons.heart,
-                            AppColors.primary,
                             'MmHg',
                             _diastolicPressureAfterController,
                           ),
@@ -551,7 +566,8 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
     );
   }
 
-  Widget _buildIndicator(String label, IconData icon, Color color, String placeholder, TextEditingController controller) {
+  Widget _buildIndicator(
+      String label, String placeholder, TextEditingController controller) {
     bool _isFieldEmpty(TextEditingController controller) {
       return controller.text.isEmpty;
     }
@@ -561,14 +577,6 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: Colors.black, size: 20),
-          ),
           const SizedBox(width: 6),
           Expanded(
             child: Column(
@@ -583,10 +591,12 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                 ),
                 const SizedBox(height: 4),
                 SizedBox(
-                  width: 90,
+                  width: double.infinity,
                   height: 30,
                   child: TextField(
                     controller: controller,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: InputDecoration(
                       contentPadding: const EdgeInsets.symmetric(
                         vertical: 8,
@@ -595,29 +605,30 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide(
-                          color: _showValidation && _isFieldEmpty(controller) 
-                              ? Colors.red 
+                          color: _showValidation && _isFieldEmpty(controller)
+                              ? Colors.red
                               : Colors.grey[300]!,
                         ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide(
-                          color: _showValidation && _isFieldEmpty(controller) 
-                              ? Colors.red 
+                          color: _showValidation && _isFieldEmpty(controller)
+                              ? Colors.red
                               : Colors.grey[300]!,
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide(
-                          color: _showValidation && _isFieldEmpty(controller) 
-                              ? Colors.red 
+                          color: _showValidation && _isFieldEmpty(controller)
+                              ? Colors.red
                               : AppColors.primary,
                         ),
                       ),
                       filled: true,
                       fillColor: Colors.white,
+                      hintText: placeholder,
                     ),
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontSize: 12),
@@ -637,14 +648,6 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Container(
-          //   padding: const EdgeInsets.all(6),
-          //   decoration: BoxDecoration(
-          //     color: AppColors.primary,
-          //     borderRadius: BorderRadius.circular(12),
-          //   ),
-          // ),
-          // const SizedBox(width: 6),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -659,6 +662,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                 const SizedBox(height: 4),
                 Container(
                   height: 30,
+                  width: double.infinity,
                   decoration: BoxDecoration(
                     color: AppColors.primary,
                     borderRadius: BorderRadius.circular(8),
@@ -721,8 +725,6 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
       ),
     );
   }
-
-  
 
   Widget _buildDuration() {
     return Padding(
@@ -798,6 +800,32 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
           ),
         ),
       ),
+      // bottomNavigationBar: BottomNavWidget(
+      //   selectedIndex: 1,
+      //   onItemSelected: (index) {
+      //     if (index == 0) {
+      //       Navigator.pushReplacement(
+      //         context,
+      //         MaterialPageRoute(builder: (context) => const HomeScreen()),
+      //       );
+      //     } else if (index == 1) {
+      //       Navigator.pushReplacement(
+      //         context,
+      //         MaterialPageRoute(builder: (context) => const StatsScreen()),
+      //       );
+      //     } else if (index == 2) {
+      //       Navigator.pushReplacement(
+      //         context,
+      //         MaterialPageRoute(builder: (context) => const AnalysisScreen()),
+      //       );
+      //     } else if (index == 3) {
+      //       Navigator.pushReplacement(
+      //         context,
+      //         MaterialPageRoute(builder: (context) => const ProfileScreen()),
+      //       );
+      //     }
+      //   },
+      // ),
     );
   }
 }

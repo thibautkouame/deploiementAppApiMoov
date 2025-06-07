@@ -21,6 +21,8 @@ class StatsService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+
+        print('les données sont : $data');
         
         // Vérifier la structure de la réponse
         if (data is! Map<String, dynamic>) {

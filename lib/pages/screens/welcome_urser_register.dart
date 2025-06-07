@@ -8,6 +8,7 @@ import 'package:fitness/services/app_services.dart';
 import 'package:fitness/services/auth_service.dart';
 import 'package:fitness/models/user.dart';
 import 'package:fitness/pages/screens/home_screen.dart';
+import 'package:fitness/pages/loginsignup.dart';
 
 class WelcomeUserRegister extends StatefulWidget {
   const WelcomeUserRegister({super.key});
@@ -88,8 +89,14 @@ class _WelcomeUserRegisterState extends State<WelcomeUserRegister> {
         _userInfo = userInfo;
       });
     } catch (e) {
-      print('Erreur lors du chargement des informations utilisateur: $e');
-      // Ne pas bloquer l'application si les informations ne peuvent pas être chargées
+      print(
+          'Erreur lors du chargement des informations utilisateur: ${e.toString()}');
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const LoginSignupPage()),
+          (route) => false,
+        );
+      }
     }
   }
 
@@ -143,7 +150,7 @@ class _WelcomeUserRegisterState extends State<WelcomeUserRegister> {
                 Navigator.pop(context);
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => HomeScreen()),
+                  MaterialPageRoute(builder: (context) => const HomeScreen()),
                 );
               },
             );
@@ -165,7 +172,7 @@ class _WelcomeUserRegisterState extends State<WelcomeUserRegister> {
       _selectedGender = gender;
     });
     _pageController.nextPage(
-      duration: Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 300),
       curve: Curves.ease,
     );
   }
@@ -175,7 +182,7 @@ class _WelcomeUserRegisterState extends State<WelcomeUserRegister> {
       _selectedLevel = level;
     });
     _pageController.nextPage(
-      duration: Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 300),
       curve: Curves.ease,
     );
   }
@@ -186,7 +193,7 @@ class _WelcomeUserRegisterState extends State<WelcomeUserRegister> {
       backgroundColor: Colors.white,
       body: PageView(
         controller: _pageController,
-        physics: NeverScrollableScrollPhysics(),
+        physics: const NeverScrollableScrollPhysics(),
         onPageChanged: (index) {
           setState(() {
             _currentPage = index;
@@ -216,16 +223,15 @@ class _WelcomeUserRegisterState extends State<WelcomeUserRegister> {
                 borderRadius: BorderRadius.circular(15.0),
               ),
               clipBehavior: Clip.antiAlias,
-          
               child: Image.asset(
-                'assets/images/image_01.png', // Remplace par ton image
+                'assets/images/randonnee.jpg', // Remplace par ton image
                 fit: BoxFit.cover,
                 height: 250,
                 width: double.infinity,
               ),
             ),
-            SizedBox(height: 20),
-      
+            const SizedBox(height: 20),
+
             // Titre de la page
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -238,8 +244,8 @@ class _WelcomeUserRegisterState extends State<WelcomeUserRegister> {
                 ),
               ),
             ),
-            SizedBox(height: 30),
-      
+            const SizedBox(height: 30),
+
             // Ligne 1 - Sexe et Age
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -255,8 +261,8 @@ class _WelcomeUserRegisterState extends State<WelcomeUserRegister> {
                 ],
               ),
             ),
-            SizedBox(height: 15),
-      
+            const SizedBox(height: 15),
+
             // Ligne 2 - Poids et Taille
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -265,23 +271,23 @@ class _WelcomeUserRegisterState extends State<WelcomeUserRegister> {
                   Expanded(
                     child: InputFieldWidget(
                       controller: _weightController,
-                      hintText: 'Poids',
+                      hintText: 'Poids(kg)',
                       inputType: TextInputType.number,
                     ),
                   ),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: InputFieldWidget(
                       controller: _heightController,
-                      hintText: 'Taille',
+                      hintText: 'Taille(cm)',
                       inputType: TextInputType.number,
                     ),
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 15),
-      
+            const SizedBox(height: 15),
+
             // Champ d'activité
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -330,8 +336,8 @@ class _WelcomeUserRegisterState extends State<WelcomeUserRegister> {
                 },
               ),
             ),
-            SizedBox(height: 30),
-      
+            const SizedBox(height: 30),
+
             // Bouton Confirmer
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -346,12 +352,22 @@ class _WelcomeUserRegisterState extends State<WelcomeUserRegister> {
                     // Afficher un message d'erreur si un champ est vide
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                          content: Text('Veuillez renseigner tous les champs.')),
+                        content: const Text(
+                            'Veuillez remplir tous les champs obligatoires pour continuer.'),
+                        backgroundColor: Colors.red,
+                        duration: const Duration(seconds: 3),
+                        behavior: SnackBarBehavior.floating,
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
                     );
                   } else {
                     // Si tous les champs sont remplis, passer à la page suivante
                     _pageController.nextPage(
-                      duration: Duration(milliseconds: 300),
+                      duration: const Duration(milliseconds: 300),
                       curve: Curves.ease,
                     );
                   }
@@ -389,14 +405,14 @@ class _WelcomeUserRegisterState extends State<WelcomeUserRegister> {
             ),
             clipBehavior: Clip.antiAlias,
             child: Image.asset(
-              'assets/images/image_01.png',
+              'assets/images/running_beach.jpg',
               fit: BoxFit.cover,
               height: 250,
               width: double.infinity,
             ),
           ),
-          SizedBox(height: 20),
-          Text(
+          const SizedBox(height: 20),
+          const Text(
             'Récapitulons tes données',
             style: TextStyle(
               fontSize: 24,
@@ -404,10 +420,10 @@ class _WelcomeUserRegisterState extends State<WelcomeUserRegister> {
               color: AppColors.primary,
             ),
           ),
-          SizedBox(height: 40),
+          const SizedBox(height: 40),
           Container(
-            margin: EdgeInsets.symmetric(horizontal: 20),
-            padding: EdgeInsets.all(20),
+            margin: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(15),
@@ -424,25 +440,25 @@ class _WelcomeUserRegisterState extends State<WelcomeUserRegister> {
               children: [
                 _buildInfoRow(Icons.person, 'Nom d\'utilisateur',
                     _userInfo?.username ?? 'Non défini'),
-                Divider(height: 20),
+                const Divider(height: 20),
                 _buildInfoRow(Icons.person, 'Sexe', _selectedGender),
-                Divider(height: 20),
+                const Divider(height: 20),
                 _buildInfoRow(Icons.calendar_today, 'Age', '$age ans'),
-                Divider(height: 20),
+                const Divider(height: 20),
                 _buildInfoRow(Icons.monitor_weight, 'Poids', '$poids kg'),
-                Divider(height: 20),
+                const Divider(height: 20),
                 _buildInfoRow(Icons.height, 'Taille', '$taille cm'),
-                Divider(height: 20),
+                const Divider(height: 20),
                 _buildInfoRow(Icons.directions_run, 'Activité', activite),
-                Divider(height: 20),
+                const Divider(height: 20),
                 _buildInfoRow(Icons.fitness_center, 'Niveau', _selectedLevel),
               ],
             ),
           ),
-          SizedBox(height: 40),
+          const SizedBox(height: 40),
           Container(
             width: double.infinity,
-            padding: EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
               children: [
                 Expanded(
@@ -453,7 +469,7 @@ class _WelcomeUserRegisterState extends State<WelcomeUserRegister> {
                     },
                   ),
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 Expanded(
                   child: ButtonWidget(
                     text: 'Confirmer',
@@ -636,14 +652,17 @@ class _WelcomeUserRegisterState extends State<WelcomeUserRegister> {
             height: 400,
             decoration: BoxDecoration(
               border: Border.all(color: Colors.black, width: 2),
-              gradient: LinearGradient(
+              gradient: const LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [Colors.green, Colors.black],
               ),
             ),
-            child: Column(
-              children: [Image.asset('assets/images/man_level.png')],
+            child: Image.asset(
+              'assets/images/image_level.jpg',
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
             ),
           ),
           Positioned(
@@ -676,7 +695,7 @@ class _WelcomeUserRegisterState extends State<WelcomeUserRegister> {
                     ),
                     child: Ink(
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
+                        gradient: const LinearGradient(
                           colors: [Color(0xFF3AE374), Colors.white],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
@@ -685,8 +704,8 @@ class _WelcomeUserRegisterState extends State<WelcomeUserRegister> {
                       ),
                       child: Container(
                         alignment: Alignment.center,
-                        padding: EdgeInsets.symmetric(vertical: 10),
-                        child: Text(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        child: const Text(
                           'DEBUTANT',
                           style: TextStyle(fontSize: 16, color: Colors.black),
                         ),
@@ -715,8 +734,8 @@ class _WelcomeUserRegisterState extends State<WelcomeUserRegister> {
                       ),
                       child: Container(
                         alignment: Alignment.center,
-                        padding: EdgeInsets.symmetric(vertical: 10),
-                        child: Text(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        child: const Text(
                           'INTERMEDIAIRE',
                           style: TextStyle(fontSize: 16, color: Colors.black),
                         ),
@@ -745,8 +764,8 @@ class _WelcomeUserRegisterState extends State<WelcomeUserRegister> {
                       ),
                       child: Container(
                         alignment: Alignment.center,
-                        padding: EdgeInsets.symmetric(vertical: 10),
-                        child: Text(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        child: const Text(
                           'AVANCE',
                           style: TextStyle(fontSize: 16, color: Colors.black),
                         ),

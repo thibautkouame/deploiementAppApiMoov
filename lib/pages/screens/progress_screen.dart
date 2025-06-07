@@ -5,6 +5,11 @@ import 'package:fitness/services/exercise_service.dart';
 import 'package:fitness/services/auth_service.dart';
 import 'package:fitness/models/exercise_history.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:fitness/widgets/bottom_nav_widget.dart';
+import 'package:fitness/pages/screens/home_screen.dart';
+import 'package:fitness/pages/screens/stats_screen.dart';
+import 'package:fitness/pages/screens/analysis_screen.dart';
+import 'package:fitness/pages/screens/profile_screen.dart';
 
 class ProgressScreen extends StatefulWidget {
   const ProgressScreen({super.key});
@@ -19,12 +24,30 @@ class _ProgressScreenState extends State<ProgressScreen> {
   List<ExerciseHistory> filteredExercises = [];
   Map<String, int> exerciseStats = {};
   bool isLoading = true;
-  String selectedMonth = 'Avril';
+  late String selectedMonth;
 
   @override
   void initState() {
     super.initState();
+    selectedMonth = _getCurrentMonth();
     _loadExerciseData();
+  }
+
+  String _getCurrentMonth() {
+    final months = ExerciseHistory.monthToNumber.keys.toList();
+    final currentMonth = DateTime.now().month - 1; // -1 because months are 0-based
+    return months[currentMonth];
+  }
+
+  void _navigateToNextMonth() {
+    final months = ExerciseHistory.monthToNumber.keys.toList();
+    final currentIndex = months.indexOf(selectedMonth);
+    final nextIndex = (currentIndex + 1) % months.length;
+    
+    setState(() {
+      selectedMonth = months[nextIndex];
+      _filterExercisesByMonth(selectedMonth);
+    });
   }
 
   Future<void> _loadExerciseData() async {
@@ -357,7 +380,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                               SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
-                                  onPressed: () {},
+                                  onPressed: _navigateToNextMonth,
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: AppColors.primary,
                                     padding:
@@ -367,7 +390,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                                     ),
                                   ),
                                   child: const Text(
-                                    'Suivant',
+                                    'Mois suivant',
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 16,
@@ -385,6 +408,32 @@ class _ProgressScreenState extends State<ProgressScreen> {
                   ),
           ),
         ),
+      ),
+      bottomNavigationBar: BottomNavWidget(
+        selectedIndex: 3,
+        onItemSelected: (index) {
+          if (index == 0) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomeScreen()),
+            );
+          } else if (index == 1) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const StatsScreen()),
+            );
+          } else if (index == 2) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const AnalysisScreen()),
+            );
+          } else if (index == 3) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const ProfileScreen()),
+            );
+          }
+        },
       ),
     );
   }

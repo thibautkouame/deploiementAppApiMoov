@@ -6,6 +6,7 @@ class User {
   final String? username;
   final String? password;  
   final String? sex;
+  final String? profile_picture;
   final String? age;
   final String? weight;
   final String? height;
@@ -21,6 +22,7 @@ class User {
     this.username,
     this.password,
     this.sex,
+    this.profile_picture,
     this.age,
     this.weight,
     this.height,
@@ -40,6 +42,7 @@ class User {
         username: userData['username']?.toString(),
         password: userData['password']?.toString(),
         sex: userData['sex']?.toString(),
+        profile_picture: userData['profile_picture']?.toString(),
         age: userData['age']?.toString(),
         weight: userData['weight']?.toString(),
         height: userData['height']?.toString(),
@@ -57,6 +60,7 @@ class User {
       username: json['username']?.toString(),
       password: json['password']?.toString(),
       sex: json['sex']?.toString(),
+      profile_picture: json['profile_picture']?.toString(),
       age: json['age']?.toString(),
       weight: json['weight']?.toString(),
       height: json['height']?.toString(),

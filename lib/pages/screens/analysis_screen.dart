@@ -6,6 +6,7 @@ import 'package:fitness/theme/theme.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:fitness/pages/loginsignup.dart';
 
 class AnalysisScreen extends StatefulWidget {
   const AnalysisScreen({super.key});
@@ -26,6 +27,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
   @override
   void initState() {
     super.initState();
+    _checkToken();
     _loadExerciseData();
     // Désactiver le chargement après 10 secondes
     Future.delayed(const Duration(seconds: 1), () {
@@ -35,6 +37,18 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
         });
       }
     });
+  }
+
+  Future<void> _checkToken() async {
+    final token = await AuthService.getToken();
+    if (token == null || token.isEmpty) {
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const LoginSignupPage()),
+          (route) => false,
+        );
+      }
+    }
   }
 
   Future<void> _loadExerciseData() async {
@@ -54,6 +68,16 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
         });
       }
     } catch (e) {
+      if (e.toString().contains('401') || e.toString().toLowerCase().contains('unauthorized')) {
+        await AuthService.removeToken();
+        if (mounted) {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const LoginSignupPage()),
+            (route) => false,
+          );
+        }
+        return;
+      }
       print('Error loading exercise data: $e');
     }
   }
@@ -413,7 +437,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                     : Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.blue.shade100,
+                          color: Colors.orange.shade100,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Column(
@@ -433,6 +457,39 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                         ),
                       ),
               ),
+              
+            ],
+          ),
+           const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: isLoading
+                    ? _buildShimmerContainer()
+                    : Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade100,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.local_fire_department, color: Colors.orange),
+                                Text('Sensation après', style: GoogleFonts.poppins(color: Colors.black, fontSize: 11.5),),
+                              ],
+                            ),
+                            Text(
+                              currentDayStats?.sensationAfter ?? '0/0',
+                              style: GoogleFonts.poppins(color: Colors.black, fontSize: 15),
+                            ),
+                          ],
+                        ),
+                      ),
+              ),
+              
             ],
           ),
 
@@ -469,12 +526,46 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
     );
   }
 
+
   Widget _buildPostExerciseIndicators() {
     return Container(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+Text(
+            'Indicateurs Pendant l\'exercice',
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: isLoading
+                    ? _buildShimmerContainer()
+                    : Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade100,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Sensation pendant', style: GoogleFonts.poppins(color: Colors.black, fontSize: 11.5),),
+                            Text(
+                              currentDayStats?.sensationDuring ?? '0/0',
+                              style: GoogleFonts.poppins(color: Colors.black, fontSize: 27),
+                            ),
+                          ],
+                        ),
+                      ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
           Text(
             'Indicateurs après exercice',
             style: GoogleFonts.poppins(
@@ -497,42 +588,16 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Durée', style: GoogleFonts.poppins(color: Colors.black, fontSize: 11.5),),
+                            Text(' Durée', style: GoogleFonts.poppins(color: Colors.black, fontSize: 11.5),),
                             Text(
-                              '${currentDayStats?.duration ?? '0'} min',
+                              _formatDuration(currentDayStats?.duration ?? '00:00'),
                               style: GoogleFonts.poppins(color: Colors.black, fontSize: 27),
                             ),
                           ],
                         ),
                       ),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: isLoading
-                    ? _buildShimmerContainer()
-                    : Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.shade100,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(Icons.water_drop, color: Colors.blue),
-                                Text('Répétitions', style: GoogleFonts.poppins(color: Colors.black, fontSize: 11.5),),
-                              ],
-                            ),
-                            Text(
-                              '${currentDayStats?.repetition ?? '0'} répétitions',
-                              style: GoogleFonts.poppins(color: Colors.black, fontSize: 27),
-                            ),
-                          ],
-                        ),
-                      ),
-              ),
+              
             ],
           ),
           const SizedBox(height: 16),
@@ -623,37 +688,6 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
             ],
           ),
 
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: isLoading
-                    ? _buildShimmerContainer()
-                    : Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.shade100,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(Icons.local_fire_department, color: Colors.orange),
-                                Text('Sensation \n pendant', style: GoogleFonts.poppins(color: Colors.black, fontSize: 11.5),),
-                              ],
-                            ),
-                            Text(
-                              currentDayStats?.sensationDuring ?? '0/0',
-                              style: GoogleFonts.poppins(color: Colors.black, fontSize: 15),
-                            ),
-                          ],
-                        ),
-                      ),
-              ),
-            ],
-          ),
           const SizedBox(height: 16),
           Row(
             children: [
@@ -756,7 +790,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                       ),
                     ),
                     child: Text(
-                      currentDayExercises.length > 1 ? 'Exercice suivant' : 'Suivant',
+                      currentDayExercises.length > 1 ? 'Exercice suivant' : 'Exercice suivant',
                       style: GoogleFonts.poppins(color: Colors.black),
                     ),
                   ),
@@ -777,3 +811,16 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
     );
   }
 } 
+
+ String _formatDuration(String duration) {
+    final parts = duration.split(":");
+    if (parts.length == 2) {
+      final hours = int.tryParse(parts[0]) ?? 0;
+      final minutes = int.tryParse(parts[1]) ?? 0;
+      String result = "";
+      if (hours > 0) result += "${hours}h ";
+      if (minutes > 0 || hours == 0) result += "${minutes}min";
+      return result.trim();
+    }
+    return duration;
+  }

@@ -8,6 +8,11 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:fitness/pages/screens/home_screen.dart';
 import 'package:fitness/pages/screens/analysis_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:fitness/services/auth_service.dart';
+import 'package:fitness/pages/loginsignup.dart';
+import 'package:fitness/widgets/bottom_nav_widget.dart';
+import 'package:fitness/pages/screens/profile_screen.dart';
+
 class StatsScreen extends StatefulWidget {
   const StatsScreen({super.key});
 
@@ -25,7 +30,20 @@ class _StatsScreenState extends State<StatsScreen> {
   void initState() {
     super.initState();
     initializeDateFormatting('fr_FR');
+    _checkToken();
     _fetchData();
+  }
+
+  Future<void> _checkToken() async {
+    final token = await AuthService.getToken();
+    if (token == null || token.isEmpty) {
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const LoginSignupPage()),
+          (route) => false,
+        );
+      }
+    }
   }
 
   Future<void> _fetchData() async {
@@ -40,6 +58,16 @@ class _StatsScreenState extends State<StatsScreen> {
         _isLoading = false;
       });
     } catch (e) {
+      if (e.toString().contains('401') || e.toString().toLowerCase().contains('unauthorized')) {
+        await AuthService.removeToken();
+        if (mounted) {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const LoginSignupPage()),
+            (route) => false,
+          );
+        }
+        return;
+      }
       setState(() {
         _error = e.toString();
         _isLoading = false;
@@ -48,18 +76,47 @@ class _StatsScreenState extends State<StatsScreen> {
   }
 
   List<Color> getExerciseColors(String exerciseType) {
-    switch (exerciseType.toLowerCase()) {
-      case 'jogging':
-        return [Colors.blue, Colors.blue.withOpacity(0.5)];
-      case 'marcher':
-        return [Colors.green, Colors.green.withOpacity(0.5)];
-      case 'tirer':
-        return [Colors.red, Colors.red.withOpacity(0.5)];
-      case 'saut':
-        return [Colors.orange, Colors.orange.withOpacity(0.5)];
-      default:
-        return [Colors.purple, Colors.purple.withOpacity(0.5)];
+    // Générer une couleur unique basée sur le nom de l'exercice
+    final hash = exerciseType.hashCode;
+    final hue = (hash % 360).toDouble(); // Valeur entre 0 et 360 pour le teinte
+    final saturation = 0.7; // Saturation fixe à 70%
+    final lightness = 0.5; // Luminosité fixe à 50%
+
+    // Convertir HSL en RGB
+    final h = hue / 360;
+    final s = saturation;
+    final l = lightness;
+
+    double r, g, b;
+
+    if (s == 0) {
+      r = g = b = l;
+    } else {
+      final hue2rgb = (double p, double q, double t) {
+        if (t < 0) t += 1;
+        if (t > 1) t -= 1;
+        if (t < 1/6) return p + (q - p) * 6 * t;
+        if (t < 1/2) return q;
+        if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+        return p;
+      };
+
+      final q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      final p = 2 * l - q;
+
+      r = hue2rgb(p, q, h + 1/3);
+      g = hue2rgb(p, q, h);
+      b = hue2rgb(p, q, h - 1/3);
     }
+
+    final color = Color.fromRGBO(
+      (r * 255).round(),
+      (g * 255).round(),
+      (b * 255).round(),
+      1,
+    );
+
+    return [color, color.withOpacity(0.5)];
   }
 
   List<LineChartBarData> _generateLineBars() {
@@ -150,7 +207,7 @@ class _StatsScreenState extends State<StatsScreen> {
                 if (_isLoading)
                   const Center(child: CircularProgressIndicator())
                 else if (_error.isNotEmpty)
-                  Center(child: Text(_error))
+                  Center(child: Text('Erreur ici : $_error'))
                 else
                   Column(
                     children: [
@@ -215,6 +272,32 @@ class _StatsScreenState extends State<StatsScreen> {
           ),
         ),
       ),
+      // bottomNavigationBar: BottomNavWidget(
+      //   selectedIndex: 1,
+      //   onItemSelected: (index) {
+      //     if (index == 0) {
+      //       Navigator.pushReplacement(
+      //         context,
+      //         MaterialPageRoute(builder: (context) => const HomeScreen()),
+      //       );
+      //     } else if (index == 1) {
+      //       Navigator.pushReplacement(
+      //         context,
+      //         MaterialPageRoute(builder: (context) => const StatsScreen()),
+      //       );
+      //     } else if (index == 2) {
+      //       Navigator.pushReplacement(
+      //         context,
+      //         MaterialPageRoute(builder: (context) => const AnalysisScreen()),
+      //       );
+      //     } else if (index == 3) {
+      //       Navigator.pushReplacement(
+      //         context,
+      //         MaterialPageRoute(builder: (context) => const ProfileScreen()),
+      //       );
+      //     }
+      //   },
+      // ),
     );
   }
 
@@ -264,16 +347,35 @@ class _StatsScreenState extends State<StatsScreen> {
   }
 
   Widget _buildPredictionSection() {
-    final exerciseTypes = _statistics['exercise_types'] as Map<String, dynamic>?;
-    int totalExercises = 0;
-    
-    if (exerciseTypes != null) {
-      exerciseTypes.forEach((type, count) {
-        totalExercises += count as int;
-      });
+    final scoreAnalysis = _statistics['score_analysis'] as Map<String, dynamic>?;
+    final currentTotalScore = scoreAnalysis?['current_total_score'] ?? 0;
+    final targetTotalScore = scoreAnalysis?['target_score'] ?? 0;
+    final estimatedCompletionDate = scoreAnalysis?['estimated_completion_date'] ?? '';
+    final progressPercentage = scoreAnalysis?['progress_percentage'] ?? 0;
+    final totalEndurance = _statistics['total_endurance'] ?? 0;
+    final totalRegularity = _statistics['total_regularity'] ?? 0;
+    final averageAbility = _statistics['average_ability'] ?? 0;
+    final averageEndurance = _statistics['average_endurance'] ?? 0;
+    final averageRegularity = _statistics['average_regularity'] ?? 0;
+    final estimated_months_to_target = scoreAnalysis?['estimated_months_to_target'] ?? 'Reviens plus tard';
+
+    String getEstimatedMonth() {
+      if (estimatedCompletionDate.isEmpty || estimatedCompletionDate == '0') {
+        // Ajouter 3 mois à la date actuelle
+        final now = DateTime.now();
+        // Gérer le cas où l'addition des mois dépasse 12
+        int newMonth = now.month + 3;
+        int newYear = now.year;
+        if (newMonth > 12) {
+          newYear += (newMonth ~/ 12);
+          newMonth = newMonth % 12;
+          if (newMonth == 0) newMonth = 12;
+        }
+        final futureDate = DateTime(newYear, newMonth, now.day);
+        return DateFormat('MMMM', 'fr_FR').format(futureDate);
+      }
+      return _formatDate(estimatedCompletionDate).split(' ')[1];
     }
-    
-    final monthsToReach = _statistics['months_to_reach'] ?? 5;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -285,60 +387,184 @@ class _StatsScreenState extends State<StatsScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 8),
-        Text(
-          'Vous atteindrez un niveau d\'endurance de $totalExercises d\'ici $monthsToReach mois. Essayez de maintenir votre fréquence pour voir ce résultat !',
-          style: GoogleFonts.poppins(
-            fontSize: 15,
-            color: Colors.black87,
-                          height: 1.5,
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                spreadRadius: 1,
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                targetTotalScore == null || targetTotalScore == 0
+                  ? 'Commence un exercice pour estimer ton évolution !'
+                  : 'Vous trouverez ci-joint votre évolution. Maintenez cette fréquence pour une progression constante !',
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text('Votre progression actuelle',
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+        
+              _buildStatRow('Moyenne Capacité', '${averageAbility}/10'),
+              const SizedBox(height: 12),
+              _buildStatRow('Moyenne Endurance', '${averageEndurance}/10'),
+              const SizedBox(height: 12),
+              _buildStatRow('Moyenne Régularité', '${averageRegularity}/10'),
+            ],
           ),
         ),
         const SizedBox(height: 16),
         Container(
           height: 200,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            color: const Color(0xFF232B34), // fond sombre
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.15),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-          child: LineChart(
-            LineChartData(
-              gridData: FlGridData(show: false),
-              titlesData: FlTitlesData(show: false),
-              borderData: FlBorderData(show: false),
-              lineBarsData: [
-                LineChartBarData(
-                  spots: [
-                    const FlSpot(0, 20),
-                    const FlSpot(1, 25),
-                    const FlSpot(2, 35),
-                    const FlSpot(3, 40),
-                    const FlSpot(4, 50),
-                    const FlSpot(5, 60),
-                    FlSpot(6, totalExercises.toDouble()),
-                  ],
-                  isCurved: true,
-                  gradient: LinearGradient(
-                    colors: [Colors.orange, Colors.red],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+            child: LineChart(
+              LineChartData(
+                minX: 0,
+                maxX: 2,
+                minY: 0,
+                maxY: [averageAbility, averageEndurance, averageRegularity].reduce((a, b) => a > b ? a : b) * 1.3 + 10,
+                gridData: FlGridData(
+                  show: true,
+                  drawVerticalLine: true,
+                  getDrawingHorizontalLine: (value) => FlLine(
+                    color: Colors.white.withOpacity(0.08),
+                    strokeWidth: 1,
                   ),
-                  barWidth: 4,
-                  dotData: FlDotData(show: false),
-                  belowBarData: BarAreaData(
-                    show: true,
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.orange.withOpacity(0.3),
-                        Colors.red.withOpacity(0.3),
-                      ],
-                    ),
+                  getDrawingVerticalLine: (value) => FlLine(
+                    color: Colors.white.withOpacity(0.08),
+                    strokeWidth: 1,
                   ),
                 ),
-              ],
+                titlesData: FlTitlesData(
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 36,
+                      getTitlesWidget: (value, meta) {
+                        if (value == 0) return const Text('0', style: TextStyle(color: Colors.white70, fontSize: 12));
+                        if (value >= 1000) return Text('${(value/1000).toStringAsFixed(0)}k', style: const TextStyle(color: Colors.white70, fontSize: 12));
+                        return Text(value.toInt().toString(), style: const TextStyle(color: Colors.white70, fontSize: 12));
+                      },
+                    ),
+                  ),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      getTitlesWidget: (value, meta) {
+                        switch (value.toInt()) {
+                          case 0:
+                            // return const Text('Régularité', style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold));
+                          case 1:
+                            // return const Text('Capacité', style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold));
+                          case 2:
+                            // return const Text('Endurance', style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold));
+                          default:
+                            return const SizedBox.shrink();
+                        }
+                      },
+                    ),
+                  ),
+                  rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                ),
+                borderData: FlBorderData(show: false),
+                lineBarsData: [
+                  LineChartBarData(
+                    spots: [
+                      FlSpot(0, averageRegularity is num ? averageRegularity.toDouble() : 0.0),
+                      FlSpot(1, averageAbility is num ? averageAbility.toDouble() : 0.0),
+                      FlSpot(2, averageEndurance is num ? averageEndurance.toDouble() : 0.0),
+                    ],
+                    isCurved: true,
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF00C6FB), Color(0xFF005BEA)],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                    barWidth: 5,
+                    isStrokeCapRound: true,
+                    dotData: FlDotData(show: false),
+                    belowBarData: BarAreaData(
+                      show: true,
+                      gradient: LinearGradient(
+                        colors: [
+                          const Color(0xFF00C6FB).withOpacity(0.3),
+                          const Color(0xFF005BEA).withOpacity(0.1),
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
       ],
     );
+  }
+
+  Widget _buildStatRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: 14,
+            color: Colors.grey[600],
+          ),
+        ),
+        Text(
+          value,
+          style: GoogleFonts.poppins(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _formatDate(String dateStr) {
+    try {
+      final date = DateTime.parse(dateStr);
+      return DateFormat('dd MMMM yyyy', 'fr_FR').format(date);
+    } catch (e) {
+      return dateStr;
+    }
   }
 
   Widget _buildAdviceSection() {
@@ -362,13 +588,12 @@ class _StatsScreenState extends State<StatsScreen> {
             width: 150,
             margin: const EdgeInsets.only(top: 16),
             padding: const EdgeInsets.all(16),
-          
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-                color: AppColors.primary,
+              color: AppColors.primary,
             ),
             child: Text(
-               textAlign: TextAlign.center,
+              textAlign: TextAlign.center,
               'Nos Conseils',
               style: GoogleFonts.poppins(
                 fontSize: 14,
@@ -379,20 +604,67 @@ class _StatsScreenState extends State<StatsScreen> {
         ),
         const SizedBox(height: 16),
         Container(
-          // padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
-            
           ),
-          child: Text(
-            'Nous avons remarqué que tu as effectué un grand nombre d\'exercices axés sur $mostFrequentExercise ! Pour un entraînement équilibré, nous vous suggérons d\'ajouter d\'autres types d\'exercices à ta routine.',
-            style: GoogleFonts.poppins(
-              fontSize: 15,
-              color: Colors.black87,
-              height: 1.5,
-            ),
-          ),
+          child:
+            (mostFrequentExercise == null || mostFrequentExercise.isEmpty)
+              ? Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Center(
+                        child: Image.asset(
+                          'assets/images/training_2.png',
+                          height: 150,
+                          width: 150,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Faites un exercice pour voir',
+                        style: GoogleFonts.poppins(
+                          fontSize: 15,
+                          color: Colors.black87,
+                          height: 1.5,
+                        ),
+                      ),
+                    ],
+                  )
+                )
+              : RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: 'Nous avons remarqué que tu as effectué un grand nombre d\'exercices axés sur ',
+                        style: GoogleFonts.poppins(
+                          fontSize: 15,
+                          color: Colors.black87,
+                          height: 1.5,
+                        ),
+                      ),
+                      TextSpan(
+                        text: mostFrequentExercise,
+                        style: GoogleFonts.poppins(
+                          fontSize: 15,
+                          color: Colors.black87,
+                          height: 1.5,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      TextSpan(
+                        text: ' ! Pour un entraînement équilibré, nous vous suggérons d\'ajouter d\'autres types d\'exercices à ta routine.',
+                        style: GoogleFonts.poppins(
+                          fontSize: 15,
+                          color: Colors.black87,
+                          height: 1.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
         ),
 
         const SizedBox(height: 16),

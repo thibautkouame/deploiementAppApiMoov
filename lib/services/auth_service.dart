@@ -1,10 +1,13 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:fitness/models/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  static const String baseUrl = 'http://192.168.1.5:3000/api';
+  static const String baseUrl = 'https://apimoov-back-rea7v.ondigitalocean.app/api';
+  static const String baseUrlImage = 'https://apimoov-back-rea7v.ondigitalocean.app';
   static const String _tokenKey = 'auth_token';
 
   Future<Map<String, dynamic>> signup({
@@ -76,24 +79,50 @@ class AuthService {
       print('Status code: ${response.statusCode}');
       print('Response body: ${response.body}');
 
+      if (response.statusCode == 401) {
+        throw Exception('Token invalide');
+      }
+
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         print('Response data parsed: $responseData');
         print('Response data keys: ${responseData.keys}');
-        
+
         if (responseData.isEmpty) {
           throw Exception('Aucune donnée utilisateur reçue');
         }
-          
+
         final user = User.fromJson(responseData);
         print('User object created: ${user.username}');
         return user;
       } else {
-        throw Exception('Erreur lors de la récupération des informations utilisateur: ${response.body}');
+        throw Exception(
+            'Erreur lors de la récupération des informations utilisateur: ${response.body}');
       }
     } catch (e) {
       print('Erreur détaillée: $e');
       throw Exception('Erreur lors de la connexion au serveur: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> requestOtp({
+    required String email,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/user/request-reset'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception(
+            'Erreur lors de la réinitialisation du mot de passe: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Erreur lors de la réinitialisation du mot de passe: $e');
     }
   }
 
@@ -109,36 +138,82 @@ class AuthService {
     required String height,
     required String actual_level,
     required String daily_training_type,
+    File? profilePicture,
   }) async {
     try {
-      final response = await http.put(
+      var request = http.MultipartRequest(
+        'PUT',
         Uri.parse('$baseUrl/user/update-profile'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({
-          'f_name': firstName,
-          'l_name': lastName,
-          'email': email,
-          'username': username,
-          'sex': sex,
-          'age': age,
-          'weight': weight,
-          'height': height,
-          'actual_level': actual_level,
-          'daily_training_type': daily_training_type,
-        }),
       );
+
+      // Add authorization header
+      request.headers['Authorization'] = 'Bearer $token';
+
+      // Add text fields
+      request.fields['f_name'] = firstName;
+      request.fields['l_name'] = lastName;
+      request.fields['email'] = email;
+      request.fields['username'] = username;
+      request.fields['sex'] = sex;
+      request.fields['age'] = age;
+      request.fields['weight'] = weight;
+      request.fields['height'] = height;
+      request.fields['actual_level'] = actual_level;
+      request.fields['daily_training_type'] = daily_training_type;
+
+      // Add profile picture if provided
+      if (profilePicture != null) {
+        final fileStream = http.ByteStream(profilePicture.openRead());
+        final fileLength = await profilePicture.length();
+
+        final multipartFile = http.MultipartFile(
+          'profile_picture',
+          fileStream,
+          fileLength,
+          filename: profilePicture.path.split('/').last,
+          contentType: MediaType('image', 'jpeg'),
+        );
+
+        request.files.add(multipartFile);
+      }
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         return User.fromJson(responseData);
       } else {
-        throw Exception('Erreur lors de la mise à jour du profil: ${response.body}');
+        throw Exception(
+            'Erreur lors de la mise à jour du profil: ${response.body}');
       }
     } catch (e) {
-      throw Exception('Erreur lors de la connexion au serveur: $e');  
+      throw Exception('Erreur lors de la connexion au serveur: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> verifyOtpAndChangePassword({
+    required String email,
+    required String otp,
+    required String newPassword,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/user/reset-password'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': email,
+          'otp': otp,
+          'newPassword': newPassword,
+        }),
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Erreur lors de la vérification du code OTP: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Erreur lors de la vérification du code OTP: $e');
     }
   }
 

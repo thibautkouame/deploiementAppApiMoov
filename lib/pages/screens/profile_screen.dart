@@ -8,6 +8,10 @@ import 'package:fitness/theme/theme.dart';
 import 'package:fitness/pages/screens/edit_profile.dart';
 import 'package:fitness/pages/screens/stats_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:fitness/pages/welcome.dart';
+import 'package:fitness/pages/loginsignup.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -19,6 +23,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   late Future<User> _userFuture;
   final AuthService _authService = AuthService();
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -37,6 +42,74 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() {
         _userFuture = Future.error('User not authenticated');
       });
+    }
+  }
+
+  Future<void> _pickAndUpdateProfilePicture() async {
+    try {
+      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+      if (image == null) return;
+
+      final token = await AuthService.getToken();
+      if (token == null) {
+        throw Exception('Non authentifié');
+      }
+
+      // Get current user data
+      final currentUser = await _userFuture;
+      
+      // Update profile with new picture
+      final updatedUser = await _authService.updateProfile(
+        token: token,
+        firstName: currentUser.f_name ?? '',
+        lastName: currentUser.l_name ?? '',
+        email: currentUser.email ?? '',
+        username: currentUser.username ?? '',
+        sex: currentUser.sex ?? '',
+        age: currentUser.age ?? '',
+        weight: currentUser.weight ?? '',
+        height: currentUser.height ?? '',
+        actual_level: currentUser.actual_level ?? '',
+        daily_training_type: currentUser.daily_training_type ?? '',
+        profilePicture: File(image.path),
+      );
+
+      // Refresh user data
+      setState(() {
+        _userFuture = Future.value(updatedUser);
+      });
+
+     ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                    'Profil mis à jour avec succès.'),
+                TextButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  },
+                  child: const Text(
+                    'OK',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+            duration: const Duration(seconds: 2),
+            backgroundColor: AppColors.primary,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          ),
+        );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur lors de la mise à jour de la photo: $e')),
+      );
     }
   }
 
@@ -60,6 +133,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       }
 
                       if (snapshot.hasError) {
+                        if (snapshot.error.toString().contains('Token invalide') || snapshot.error.toString().contains('401')) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            Navigator.of(context).pushAndRemoveUntil(
+                              MaterialPageRoute(builder: (context) => const LoginSignupPage()),
+                              (route) => false,
+                            );
+                          });
+                          return const SizedBox.shrink();
+                        }
                         return Center(
                           child: Text('Erreur: ${snapshot.error}'),
                         );
@@ -98,20 +180,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           // Profile Picture and Name
                           Column(
                             children: [
-                              Container(
-                                height: 100,
-                                width: 100,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: AppColors.primary, // Border color
-                                    width: 1.0, // Border width
-                                  ),
-                                ),
-                                child: CircleAvatar(
-                                  radius: 50,
-                                  backgroundColor: Colors.white,
-                                  child: Image.asset('assets/images/profile_image.gif', width: 50, height: 50),
+                              GestureDetector(
+                                onTap: _pickAndUpdateProfilePicture,
+                                child: Stack(
+                                  children: [
+                                    Container(
+                                      height: 100,
+                                      width: 100,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: AppColors.primary,
+                                          width: 1.0,
+                                        ),
+                                      ),
+                                      child: CircleAvatar(
+                                        radius: 50,
+                                        backgroundColor: Colors.white,
+                                        backgroundImage: NetworkImage(user.profile_picture != null 
+                                          ? '${AuthService.baseUrlImage}${user.profile_picture}' 
+                                          : 'https://img.freepik.com/premium-vector/collection-3d-sport-icon-collection-isolated-blue-sport-recreation-concept_112554-928.jpg'),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      bottom: 0,
+                                      right: 0,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(4),
+                                        decoration: const BoxDecoration(
+                                          color: AppColors.primary,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          LucideIcons.camera,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                               const SizedBox(height: 8),

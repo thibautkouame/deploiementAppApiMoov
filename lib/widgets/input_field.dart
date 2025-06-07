@@ -8,6 +8,7 @@ class InputFieldWidget extends StatefulWidget {
   final bool isPassword;
   final bool isEmail;
   final TextInputType inputType; // Nouveau paramètre pour le type de clavier
+  final bool error;
 
   const InputFieldWidget({
     super.key,
@@ -16,6 +17,7 @@ class InputFieldWidget extends StatefulWidget {
     this.isPassword = false,
     this.isEmail = false,
     this.inputType = TextInputType.text, // Valeur par défaut : TextInputType.text
+    this.error = false,
   });
 
   @override
@@ -37,15 +39,15 @@ class _InputFieldWidgetState extends State<InputFieldWidget> {
         hintStyle: GoogleFonts.poppins(), // Apply Google Fonts Poppins to hint text
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF3AE374)),
+          borderSide: BorderSide(color: widget.error ? Colors.red : const Color(0xFF3AE374)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF3AE374)),
+          borderSide: BorderSide(color: widget.error ? Colors.red : const Color(0xFF3AE374)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF3AE374), width: 2),
+          borderSide: BorderSide(color: widget.error ? Colors.red : const Color(0xFF3AE374), width: 2),
         ),
         suffixIcon: widget.isPassword
             ? IconButton(
