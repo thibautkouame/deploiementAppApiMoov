@@ -588,7 +588,7 @@ Text(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(' Durée', style: GoogleFonts.poppins(color: Colors.black, fontSize: 11.5),),
+                            Text(' Durée(min)', style: GoogleFonts.poppins(color: Colors.black, fontSize: 11.5),),
                             Text(
                               _formatDuration(currentDayStats?.duration ?? '00:00'),
                               style: GoogleFonts.poppins(color: Colors.black, fontSize: 27),

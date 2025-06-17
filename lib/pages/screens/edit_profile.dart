@@ -278,6 +278,11 @@ class _EditProfileState extends State<EditProfile> {
                                               onPressed: () =>
                                                   Navigator.pop(ctx, 'Homme'),
                                             ),
+                                            SimpleDialogOption(
+                                              child: const Text('Autre'),
+                                              onPressed: () =>
+                                                  Navigator.pop(ctx, 'Autre'),
+                                            ),
                                           ],
                                         ),
                                       );

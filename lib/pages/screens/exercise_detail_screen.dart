@@ -6,16 +6,11 @@ import 'package:fitness/theme/theme.dart';
 import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 import 'package:intl/intl.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:fitness/widgets/selector_widget.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:fitness/services/auth_service.dart';
-import 'package:fitness/widgets/bottom_nav_widget.dart';
-import 'package:fitness/pages/screens/home_screen.dart';
-import 'package:fitness/pages/screens/stats_screen.dart';
-import 'package:fitness/pages/screens/analysis_screen.dart';
-import 'package:fitness/pages/screens/profile_screen.dart';
+
 
 class ExerciseDetailScreen extends StatefulWidget {
   final ExerciseType exercise;
@@ -74,6 +69,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
       TextEditingController();
   String? _sensationAfter;
   String? _sensationDuring;
+  final TextEditingController _durationController = TextEditingController();
 
   @override
   void initState() {
@@ -120,7 +116,8 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
         _systolicPressureAfterController.text.isNotEmpty &&
         _diastolicPressureAfterController.text.isNotEmpty &&
         _sensationAfter != null &&
-        _sensationDuring != null;
+        _sensationDuring != null &&
+        _durationController.text.isNotEmpty;
   }
 
   void _showValidationSnackbar() {
@@ -175,7 +172,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
       'heart_rate_before': widget.heartRateBefore.isNotEmpty
           ? int.parse(widget.heartRateBefore)
           : null,
-      'duration': widget.exercise.duration,
+      'duration': _durationController.text,
       'repetition': repetitions,
       'calories_burned': _caloriesBurnedController.text.isNotEmpty
           ? double.parse(_caloriesBurnedController.text)
@@ -271,6 +268,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
     _diastolicPressureBeforeController.dispose();
     _systolicPressureAfterController.dispose();
     _diastolicPressureAfterController.dispose();
+    _durationController.dispose();
     super.dispose();
   }
 
@@ -727,42 +725,68 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
   }
 
   Widget _buildDuration() {
+    bool _isFieldEmpty(TextEditingController controller) {
+      return controller.text.isEmpty;
+    }
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              Icons.timer_outlined,
-              color: Colors.black,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 6),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Text(
-                  'Durée',
+                  'Durée (min)',
                   style: TextStyle(color: Colors.black, fontSize: 11),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  widget.exercise.duration,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.red,
-                    fontWeight: FontWeight.w500,
+                SizedBox(
+                  width: double.infinity,
+                  height: 30,
+                  child: TextField(
+                    controller: _durationController,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 4,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: _showValidation && _isFieldEmpty(_durationController)
+                              ? Colors.red
+                              : Colors.grey[300]!,
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: _showValidation && _isFieldEmpty(_durationController)
+                              ? Colors.red
+                              : Colors.grey[300]!,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: _showValidation && _isFieldEmpty(_durationController)
+                              ? Colors.red
+                              : AppColors.primary,
+                        ),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                      hintText: 'ex: 30',
+                    ),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 12),
                   ),
                 ),
               ],

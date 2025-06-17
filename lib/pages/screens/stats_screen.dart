@@ -154,7 +154,17 @@ class _StatsScreenState extends State<StatsScreen> {
         gradient: LinearGradient(colors: colors),
         barWidth: 0,
         isStrokeCapRound: true,
-        dotData: FlDotData(show: false),
+        dotData: FlDotData(
+          show: true,
+          getDotPainter: (spot, percent, barData, index) {
+            return FlDotCirclePainter(
+              radius: 5,
+              color: Colors.white,
+              strokeWidth: 2,
+              strokeColor: colors.first,
+            );
+          },
+        ),
         belowBarData: BarAreaData(
           show: true,
           gradient: LinearGradient(
@@ -481,15 +491,23 @@ class _StatsScreenState extends State<StatsScreen> {
                     sideTitles: SideTitles(
                       showTitles: true,
                       getTitlesWidget: (value, meta) {
-                        switch (value.toInt()) {
-                          case 0:
-                            // return const Text('Régularité', style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold));
-                          case 1:
-                            // return const Text('Capacité', style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold));
-                          case 2:
-                            // return const Text('Endurance', style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold));
-                          default:
-                            return const SizedBox.shrink();
+                        if (value == 0) {
+                          return const Padding(
+                            padding: EdgeInsets.only(top: 8.0),
+                            child: Text('Régularité', style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+                          );
+                        } else if (value == 1) {
+                          return const Padding(
+                            padding: EdgeInsets.only(top: 8.0),
+                            child: Text('Capacité', style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+                          );
+                        } else if (value == 2) {
+                          return const Padding(
+                            padding: EdgeInsets.only(top: 8.0),
+                            child: Text('Endurance', style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+                          );
+                        } else {
+                          return const SizedBox.shrink();
                         }
                       },
                     ),
@@ -513,7 +531,17 @@ class _StatsScreenState extends State<StatsScreen> {
                     ),
                     barWidth: 5,
                     isStrokeCapRound: true,
-                    dotData: FlDotData(show: false),
+                    dotData: FlDotData(
+                      show: true,
+                      getDotPainter: (spot, percent, barData, index) {
+                        return FlDotCirclePainter(
+                          radius: 6,
+                          color: Colors.white,
+                          strokeWidth: 3,
+                          strokeColor: Color(0xFF005BEA),
+                        );
+                      },
+                    ),
                     belowBarData: BarAreaData(
                       show: true,
                       gradient: LinearGradient(

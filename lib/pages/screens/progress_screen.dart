@@ -31,11 +31,12 @@ class _ProgressScreenState extends State<ProgressScreen> {
     super.initState();
     selectedMonth = _getCurrentMonth();
     _loadExerciseData();
+    print("selectedMonth: $selectedMonth");
   }
 
   String _getCurrentMonth() {
     final months = ExerciseHistory.monthToNumber.keys.toList();
-    final currentMonth = DateTime.now().month - 1; // -1 because months are 0-based
+    final currentMonth = DateTime.now().month - 1; // 0 pour janvier, 11 pour décembre
     return months[currentMonth];
   }
 
@@ -55,6 +56,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
       final token = await AuthService.getToken();
       if (token != null) {
         final data = await _exerciseService.getExerciseHistory(token);
+        print("dasssssssssssta: $data");
         setState(() {
           allExercises = _exerciseService.parseExerciseHistory(data);
           _filterExercisesByMonth(selectedMonth);

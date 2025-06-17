@@ -6,8 +6,12 @@ import 'package:fitness/models/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  static const String baseUrl = 'https://apimoov-back-rea7v.ondigitalocean.app/api';
-  static const String baseUrlImage = 'https://apimoov-back-rea7v.ondigitalocean.app';
+  // static const String baseUrl = 'https://apimoov-back-rea7v.ondigitalocean.app/api';
+  // static const String baseUrlImage = 'https://apimoov-back-rea7v.ondigitalocean.app';
+
+  static const String baseUrl = 'http://192.168.1.9:3000/api';
+  static const String baseUrlImage = 'http://192.168.1.9:3000';
+  
   static const String _tokenKey = 'auth_token';
 
   Future<Map<String, dynamic>> signup({
