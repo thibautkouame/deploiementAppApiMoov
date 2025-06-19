@@ -130,6 +130,7 @@ class _HomeContentState extends State<HomeContent> {
   Future<void> _fetchExercises() async {
     try {
       final response = await http.get(Uri.parse('${AuthService.baseUrl}/exercise-types'));
+      print('response : ${response.body}');
 
       if (response.statusCode == 401) {
         await AuthService.removeToken();
@@ -209,175 +210,181 @@ class _HomeContentState extends State<HomeContent> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Center(
-                child: Text(
-                  'Exercices',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Center(
+                  child: Text(
+                    'Exercices',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
-            ),
-            Container(
-              height: 350,
-              margin: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Image.asset(
-                      'assets/images/randonnee_2.jpg',
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  SpaceWidget.height16,
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: Container(
-                      height: 208,
-                      decoration: BoxDecoration(
-                        color: Colors.black,
-                        borderRadius: BorderRadius.circular(16),
+              Container(
+                height: 350,
+                margin: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Image.asset(
+                        'assets/images/randonnee_2.jpg',
+                        fit: BoxFit.cover,
                       ),
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(child: _buildIndicator('Qté eau', 'Litre', _waterLiterController)),
-                                Expanded(child: _buildIndicator('Sommeil', 'Heure', _sleepHoursController)),
-                                Expanded(child: _buildIndicator('Calorie Absorbée', 'Kcal', _caloriesController)),
-                              ],
+                    ),
+                    SpaceWidget.height16,
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: Container(
+                        height: 208,
+                        decoration: BoxDecoration(
+                          color: Colors.black,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(child: _buildIndicator('Qté eau', 'Litre', _waterLiterController)),
+                                  Expanded(child: _buildIndicator('Sommeil', 'Heure', _sleepHoursController)),
+                                  Expanded(child: _buildIndicator('Calorie Absorbée', 'Kcal', _caloriesController)),
+                                ],
+                              ),
                             ),
-                          ),
-                          SpaceWidget.height10,
-                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(child: _buildIndicator('Pression systolique avant', 'MmHg', _systolicPressureBeforeController)),
-                                  Expanded(child: _buildIndicator('Pression diastolique avant', 'MmHg', _diastolicPressureBeforeController)),
-                              ],
+                            SpaceWidget.height10,
+                             Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(child: _buildIndicator('Pression systolique avant', 'MmHg', _systolicPressureBeforeController)),
+                                    Expanded(child: _buildIndicator('Pression diastolique avant', 'MmHg', _diastolicPressureBeforeController)),
+                                ],
+                              ),
                             ),
-                          ),
-                          SpaceWidget.height10,
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(child: _buildIndicator('Pression\nartérielle avant', 'MmHg', _bloodPressureController)),
-                                Expanded(
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: _showValidation && _sensationBefore == null 
-                                            ? Colors.red 
-                                            : Colors.transparent,
-                                        width: 2,
+                            SpaceWidget.height10,
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(child: _buildIndicator('Pression\nartérielle avant', 'MmHg', _bloodPressureController)),
+                                  Expanded(
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: _showValidation && _sensationBefore == null 
+                                              ? Colors.red 
+                                              : Colors.transparent,
+                                          width: 2,
+                                        ),
+                                        borderRadius: BorderRadius.circular(8),
                                       ),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: SensationSelect(
-                                      label: 'Sensation avant',
-                                      value: _sensationBefore,
-                                      onChanged: (value) {
-                                        setState(() => _sensationBefore = value);
-                                      },
+                                      child: SensationSelect(
+                                        label: 'Sensation avant',
+                                        value: _sensationBefore,
+                                        onChanged: (value) {
+                                          setState(() => _sensationBefore = value);
+                                        },
+                                      ),
                                     ),
                                   ),
-                                ),
-                                Expanded(child: _buildIndicator('Frequence\ncardiaque avant', 'Bpm', _heartRateController)),
-                              ],
+                                  Expanded(child: _buildIndicator('Frequence\ncardiaque avant', 'Bpm', _heartRateController)),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: ButtonWidget(
-                borderRadius: BorderRadius.circular(20),
-                width: 290,
-                height: 50,
-                text: 'Enregistrer',
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                onPressed: () {
-                  if (!_areAllFieldsFilled()) {
-                    _showValidationSnackbar();
-                    return;
-                  }
-                  if (_exercises.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('No exercises available')),
-                    );
-                    return;
-                  }
-                  final exercise = _exercises.first;
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ExerciseDetailScreen(
-                        exercise: exercise,
-                        waterLiter: _waterLiterController.text,
-                        sleepHours: _sleepHoursController.text,
-                        calories: _caloriesController.text,
-                        bloodPressureBefore: _bloodPressureController.text,
-                        sensationBefore: _sensationBefore,
-                        heartRateBefore: _heartRateController.text,
-                        systolicPressureBefore: _systolicPressureBeforeController.text,
-                        diastolicPressureBefore: _diastolicPressureBeforeController.text,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-            if (_isLoading || _showShimmer)
-              Shimmer.fromColors(
-                baseColor: Colors.grey[300]!,
-                highlightColor: Colors.grey[100]!,
-                child: Column(
-                  children: List.generate(3, (index) => _buildShimmerItem()),
+                  ],
                 ),
-              )
-            else if (_exercises.isNotEmpty)
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(16),
-                itemCount: _exercises.length,
-                itemBuilder: (context, index) {
-                  final exercise = _exercises[index];
-                  print('exercice : $exercise');
-                  return _buildExerciseItem(exercise);
-                },
-              )
-            else
-              const Center(
-                child: Text('Aucun exercice disponible'),
               ),
-          ],
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: ButtonWidget(
+                  borderRadius: BorderRadius.circular(20),
+                  width: 290,
+                  height: 50,
+                  text: 'Enregistrer',
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  onPressed: () {
+                    if (!_areAllFieldsFilled()) {
+                      _showValidationSnackbar();
+                      return;
+                    }
+                    if (_exercises.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('No exercises available')),
+                      );
+                      return;
+                    }
+                    final exercise = _exercises.first;
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ExerciseDetailScreen(
+                          exercise: exercise,
+                          waterLiter: _waterLiterController.text,
+                          sleepHours: _sleepHoursController.text,
+                          calories: _caloriesController.text,
+                          bloodPressureBefore: _bloodPressureController.text,
+                          sensationBefore: _sensationBefore,
+                          heartRateBefore: _heartRateController.text,
+                          systolicPressureBefore: _systolicPressureBeforeController.text,
+                          diastolicPressureBefore: _diastolicPressureBeforeController.text,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              if (_isLoading || _showShimmer)
+                Shimmer.fromColors(
+                  baseColor: Colors.grey[300]!,
+                  highlightColor: Colors.grey[100]!,
+                  child: Column(
+                    children: List.generate(3, (index) => _buildShimmerItem()),
+                  ),
+                )
+              else if (_exercises.isNotEmpty)
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _exercises.length,
+                  itemBuilder: (context, index) {
+                    final exercise = _exercises[index];
+                    print('exercice : $exercise');
+                    return _buildExerciseItem(exercise);
+                  },
+                )
+              else
+                const Center(
+                  child: Text('Aucun exercice disponible'),
+                ),
+            ],
+          ),
         ),
       ),
     );
