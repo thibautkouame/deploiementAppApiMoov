@@ -38,6 +38,7 @@ class ExerciseHistory {
   final String the_day;
   final String the_month;
   final String the_year;
+  final String status;
 
   ExerciseHistory({
     required this.id,
@@ -64,6 +65,7 @@ class ExerciseHistory {
     required this.the_day,
     required this.the_month,
     required this.the_year,
+    required this.status,
   });
 
   factory ExerciseHistory.fromJson(Map<String, dynamic> json) {
@@ -91,6 +93,7 @@ class ExerciseHistory {
       heartRateAfter: json['heart_rate_after']?.toString() ?? '0',
       systolicPressureAfter: json['systolic_pressure_after']?.toString() ?? '0',
       diastolicPressureAfter: json['diastolic_pressure_after']?.toString() ?? '0',
+      status: json['status']?.toString() ?? '0',
       date: json['date']?.toString() ?? DateTime.now().toIso8601String(),
       the_day: json['the_day']?.toString() ?? DateTime.now().day.toString(),
       the_month: monthNumber,
@@ -120,6 +123,7 @@ class ExerciseHistory {
       'the_day': the_day,
       'the_month': the_month,
       'the_year': the_year,
+      'status': status,
     };
   }
 

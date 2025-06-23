@@ -10,10 +10,10 @@ import 'package:fitness/theme/theme.dart';
 import 'package:fitness/pages/screens/edit_profile.dart';
 import 'package:fitness/pages/screens/stats_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:fitness/pages/welcome.dart';
 import 'package:fitness/pages/loginsignup.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:fitness/pages/screens/home_screen.dart';
 
 import '../../widgets/success_message.dart';
 
@@ -160,6 +160,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             padding: const EdgeInsets.all(16.0),
                             child: Row(
                               children: [
+                                IconButton(
+                                  onPressed: () {
+                                    // Navigator.pop(context);
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) => const HomeScreen()));
+                                  },
+                                  icon: const Icon(Icons.arrow_back),
+                                ),
                                 Text(
                                   'Mon profil',
                                   style: GoogleFonts.poppins(
@@ -369,6 +376,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         child: _buildMenuItem(LucideIcons.trash, 'Supprimer votre compte', Colors.pink,
                                             textColor: Colors.red),
                                       ),
+                                      GestureDetector(
+                                        onTap: _logout,
+                                        child: _buildMenuItem(LucideIcons.logOut, 'Déconnexion', Colors.pink),
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -451,6 +462,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const Spacer(),
           const Icon(Icons.chevron_right, color: Colors.grey),
         ],
+      ),
+    );
+  }
+
+  void _logout() {
+    showDialog(
+      context: context,
+      builder: (context) => ConfirmMessage(
+        message: 'Voulez-vous vraiment vous déconnecter ?',
+        confirmText: "OUI",
+        cancelText: "NON",
+        onConfirm: () async {
+          Navigator.pop(context);
+          await AuthService.removeToken();
+          if (!mounted) return;
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const LoginSignupPage()),
+            (Route<dynamic> route) => false,
+          );
+        },
       ),
     );
   }

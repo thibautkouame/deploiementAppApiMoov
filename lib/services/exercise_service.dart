@@ -16,6 +16,8 @@ class ExerciseService {
         },
       );
 
+      print('eeeeresponse: $response');
+
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
         print('Raw API response: $data');

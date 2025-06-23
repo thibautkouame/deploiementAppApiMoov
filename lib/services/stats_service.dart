@@ -1,6 +1,5 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:fitness/models/exercise_stats.dart';
 import 'package:fitness/services/auth_service.dart';
 
 class StatsService {

@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:fitness/pages/loginsignup.dart';
+import 'package:fitness/pages/screens/home_screen.dart';
 
 class AnalysisScreen extends StatefulWidget {
   const AnalysisScreen({super.key});
@@ -124,6 +125,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
           the_year: selectedDate.year.toString(),
           date: selectedDate.toIso8601String(),
           exerciseTypeName: '',
+          status: '0',
         );
         currentExerciseIndex = 0;
       } else {
@@ -157,13 +159,22 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            DateFormat('MMMM yyyy', 'fr_FR').format(selectedDate).replaceFirstMapped(RegExp(r'^\w'), (match) => match.group(0)!.toUpperCase()),
-            style: GoogleFonts.poppins(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+          Row(
+            children: [
+              IconButton(onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(builder: (context) => const HomeScreen()));
+              }, icon: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black,)),
+              const SizedBox(width: 10),
+              Text(
+                DateFormat('MMMM yyyy', 'fr_FR').format(selectedDate).replaceFirstMapped(RegExp(r'^\w'), (match) => match.group(0)!.toUpperCase()),
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
           ),
+          
           Text(
             'Rapport d\'aujourd\'hui',
             style: GoogleFonts.poppins(

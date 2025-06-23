@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fitness/models/exercise_stats.dart';
 import 'package:fitness/services/stats_service.dart';
 import 'package:fitness/theme/theme.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -10,8 +9,7 @@ import 'package:fitness/pages/screens/analysis_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fitness/services/auth_service.dart';
 import 'package:fitness/pages/loginsignup.dart';
-import 'package:fitness/widgets/bottom_nav_widget.dart';
-import 'package:fitness/pages/screens/profile_screen.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class StatsScreen extends StatefulWidget {
   const StatsScreen({super.key});
@@ -49,6 +47,8 @@ class _StatsScreenState extends State<StatsScreen> {
   Future<void> _fetchData() async {
     try {
       final response = await StatsService.fetchStats();
+
+      print('les données de history et statistics : $response');
       
       setState(() {
         _history = (response['history'] as Map<String, dynamic>?)?.map(
@@ -58,6 +58,7 @@ class _StatsScreenState extends State<StatsScreen> {
         _isLoading = false;
       });
     } catch (e) {
+      print('Erreur dans _fetchData: $e');
       if (e.toString().contains('401') || e.toString().toLowerCase().contains('unauthorized')) {
         await AuthService.removeToken();
         if (mounted) {
@@ -643,12 +644,8 @@ class _StatsScreenState extends State<StatsScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Center(
-                        child: Image.asset(
-                          'assets/images/training_2.png',
-                          height: 150,
-                          width: 150,
-                        ),
+                      const Center(
+                        child: Icon(LucideIcons.dumbbell, size: 50, color: AppColors.primary),
                       ),
                       const SizedBox(height: 8),
                       Text(
