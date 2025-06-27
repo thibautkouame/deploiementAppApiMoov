@@ -20,14 +20,15 @@ import 'package:fitness/pages/loginsignup.dart';
 import 'package:fitness/widgets/bottom_nav_widget.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final int selectedIndex;
+  const HomeScreen({super.key, this.selectedIndex = 0});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
 
   final List<Widget> _pages = [
     const HomeContent(),
@@ -39,6 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _selectedIndex = widget.selectedIndex;
     _checkToken();
   }
 

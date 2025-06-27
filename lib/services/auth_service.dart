@@ -9,9 +9,9 @@ class AuthService {
   // static const String baseUrl = 'https://apimoov-back-rea7v.ondigitalocean.app/api';
   // static const String baseUrlImage = 'https://apimoov-back-rea7v.ondigitalocean.app';
 
-  static const String baseUrl = 'http://192.168.210.107:3000/api';
-  static const String baseUrlImage = 'http://192.168.210.107:3000';
-  
+  static const String baseUrl = 'http://192.168.1.8:3000/api';
+  static const String baseUrlImage = 'http://192.168.1.8:3000';
+
   static const String _tokenKey = 'auth_token';
 
   Future<Map<String, dynamic>> signup({
@@ -80,17 +80,14 @@ class AuthService {
         headers: {'Authorization': 'Bearer $token'},
       );
 
-      print('Status code: ${response.statusCode}');
-      print('Response body: ${response.body}');
-
       if (response.statusCode == 401) {
         throw Exception('Token invalide');
       }
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
-        print('Response data parsed: $responseData');
-        print('Response data keys: ${responseData.keys}');
+        // print('Response data parsed: $responseData');
+        // print('Response data keys: ${responseData.keys}');
 
         if (responseData.isEmpty) {
           throw Exception('Aucune donnée utilisateur reçue');
@@ -214,10 +211,42 @@ class AuthService {
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
-        throw Exception('Erreur lors de la vérification du code OTP: ${response.body}');
+        throw Exception(
+            'Erreur lors de la vérification du code OTP: ${response.body}');
       }
     } catch (e) {
       throw Exception('Erreur lors de la vérification du code OTP: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> requestDeleteAccount({
+    required String token,
+    required String f_name,
+    required String l_name,
+    required String email,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/user/request-delete'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'f_name': f_name,
+          'l_name': l_name,
+          'email': email,
+        }),
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        print(
+            'Erreur lors de la suppression du compte: ${response.body.toString()}');
+        throw Exception('Erreur lors de la suppression du compte');
+      }
+    } catch (e) {
+      throw Exception('Erreur lors de la connexion au serveur: $e');
     }
   }
 

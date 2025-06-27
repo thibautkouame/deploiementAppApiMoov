@@ -9,6 +9,7 @@ import 'package:fitness/pages/screens/user_profile.dart';
 import 'package:fitness/theme/theme.dart';
 import 'package:fitness/pages/screens/edit_profile.dart';
 import 'package:fitness/pages/screens/stats_screen.dart';
+import 'package:fitness/pages/screens/stats_screen_for_profil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fitness/pages/loginsignup.dart';
 import 'package:image_picker/image_picker.dart';
@@ -32,7 +33,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _userFuture = Future.error('User not authenticated'); // Initialize with error state
+    _userFuture =
+        Future.error('User not authenticated'); // Initialize with error state
     _loadUserData();
   }
 
@@ -111,7 +113,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur lors de la mise à jour de la photo: $e')),
+        SnackBar(
+            content: Text('Erreur lors de la mise à jour de la photo: $e')),
       );
     }
   }
@@ -136,11 +139,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       }
 
                       if (snapshot.hasError) {
-                        if (snapshot.error.toString().contains('Token invalide') ||
+                        if (snapshot.error
+                                .toString()
+                                .contains('Token invalide') ||
                             snapshot.error.toString().contains('401')) {
                           WidgetsBinding.instance.addPostFrameCallback((_) {
                             Navigator.of(context).pushAndRemoveUntil(
-                              MaterialPageRoute(builder: (context) => const LoginSignupPage()),
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      const LoginSignupPage()),
                               (route) => false,
                             );
                           });
@@ -163,7 +170,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 IconButton(
                                   onPressed: () {
                                     // Navigator.pop(context);
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => const HomeScreen()));
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                const HomeScreen()));
                                   },
                                   icon: const Icon(Icons.arrow_back),
                                 ),
@@ -182,7 +193,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     color: Color(0xFF4CD964),
                                     shape: BoxShape.circle,
                                   ),
-                                  child: const Icon(LucideIcons.user, color: Colors.white),
+                                  child: const Icon(LucideIcons.user,
+                                      color: Colors.white),
                                 ),
                               ],
                             ),
@@ -208,7 +220,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       child: CircleAvatar(
                                         radius: 50,
                                         backgroundColor: Colors.white,
-                                        backgroundImage: NetworkImage(user.profile_picture != null
+                                        backgroundImage: NetworkImage(user
+                                                    .profile_picture !=
+                                                null
                                             ? '${AuthService.baseUrlImage}${user.profile_picture}'
                                             : 'https://img.freepik.com/premium-vector/collection-3d-sport-icon-collection-isolated-blue-sport-recreation-concept_112554-928.jpg'),
                                       ),
@@ -245,13 +259,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                           // Stats
                           Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 24, horizontal: 16),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
-                                Flexible(child: _buildStat('Taille', '${user.height}cm')),
-                                Flexible(child: _buildStat('Poids', '${user.weight}kg')),
-                                Flexible(child: _buildStat('Age', '${user.age}ans')),
+                                Flexible(
+                                    child: _buildStat(
+                                        'Taille', '${user.height}cm')),
+                                Flexible(
+                                    child: _buildStat(
+                                        'Poids', '${user.weight}kg')),
+                                Flexible(
+                                    child: _buildStat('Age', '${user.age}ans')),
                               ],
                             ),
                           ),
@@ -290,27 +310,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         onTap: () {
                                           Navigator.push(
                                             context,
-                                            MaterialPageRoute(builder: (context) => UserProfile(user: user)),
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    UserProfile(user: user)),
                                           );
                                         },
-                                        child: _buildMenuItem(LucideIcons.user, 'Données Personnelles', Colors.pink),
+                                        child: _buildMenuItem(
+                                            LucideIcons.user,
+                                            'Données Personnelles',
+                                            Colors.pink),
                                       ),
                                       const SizedBox(height: 10),
                                       GestureDetector(
                                         onTap: () {
                                           Navigator.push(
-                                              context, MaterialPageRoute(builder: (context) => ProgressScreen()));
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      ProgressScreen()));
                                         },
-                                        child: _buildMenuItem(LucideIcons.pieChart, 'Historique', Colors.pink),
+                                        child: _buildMenuItem(
+                                            LucideIcons.pieChart,
+                                            'Historique',
+                                            Colors.pink),
                                       ),
                                       const SizedBox(height: 10),
                                       GestureDetector(
                                         onTap: () {
-                                          // Handle 'Progression' tap
-                                          Navigator.push(
-                                              context, MaterialPageRoute(builder: (context) => StatsScreen()));
+                                          Navigator.pushAndRemoveUntil(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const HomeScreen(
+                                                      selectedIndex: 1),
+                                            ),
+                                            (route) => false,
+                                          );
                                         },
-                                        child: _buildMenuItem(LucideIcons.barChartBig, 'Progression', Colors.pink),
+                                        child: _buildMenuItem(
+                                            LucideIcons.barChartBig,
+                                            'Progression',
+                                            Colors.pink),
                                       ),
                                       const SizedBox(height: 30),
                                     ],
@@ -352,16 +392,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       GestureDetector(
                                         onTap: () {
                                           Navigator.push(
-                                              context, MaterialPageRoute(builder: (context) => const EditProfile()));
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      const EditProfile()));
                                         },
-                                        child: _buildMenuItem(LucideIcons.settings, 'Paramètres', Colors.pink),
+                                        child: _buildMenuItem(
+                                            LucideIcons.settings,
+                                            'Paramètres',
+                                            Colors.pink),
                                       ),
                                       const SizedBox(height: 10),
                                       GestureDetector(
                                         onTap: () {
                                           showDialog(
                                             context: context,
-                                            builder: (context) => ConfirmMessage(
+                                            builder: (context) =>
+                                                ConfirmMessage(
                                               message:
                                                   'Voulez-vous vraiment supprimer votre compte ? Cette action est irréversible.',
                                               confirmText: "OUI",
@@ -373,12 +420,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             ),
                                           );
                                         },
-                                        child: _buildMenuItem(LucideIcons.trash, 'Supprimer votre compte', Colors.pink,
+                                        child: _buildMenuItem(
+                                            LucideIcons.trash,
+                                            'Supprimer votre compte',
+                                            Colors.pink,
                                             textColor: Colors.red),
                                       ),
                                       GestureDetector(
                                         onTap: _logout,
-                                        child: _buildMenuItem(LucideIcons.logOut, 'Déconnexion', Colors.pink),
+                                        child: _buildMenuItem(
+                                            LucideIcons.logOut,
+                                            'Déconnexion',
+                                            Colors.pink),
                                       ),
                                     ],
                                   ),
@@ -446,7 +499,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildMenuItem(IconData icon, String title, Color color, {Color? textColor}) {
+  Widget _buildMenuItem(IconData icon, String title, Color color,
+      {Color? textColor}) {
     return Container(
       height: 70,
       color: Colors.white, // Added background color
@@ -487,14 +541,61 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _deleteAccount() async {
+    final token = await AuthService.getToken();
+    if (token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Non authentifié.')),
+      );
+      return;
+    }
     showLoadingDialog(context);
-    await Future.delayed(const Duration(seconds: 2));
-    Navigator.pop(context);
-    showDialog(
+    try {
+      // Recharge le user à la dernière seconde pour garantir les bonnes infos
+      final user = await AuthService().getUserInfo(token);
+      final response = await AuthService().requestDeleteAccount(
+        token: token,
+        f_name: user.f_name ?? '',
+        l_name: user.l_name ?? '',
+        email: user.email ?? '',
+      );
+
+      print('la reponse est: ${response}');
+      Navigator.pop(context); // Fermer loading
+      if (response['status'] == 200) {
+        showDialog(
+          context: context,
+          builder: (context) => SuccessMessage(
+            message:
+                "${response?['message'] ?? response.toString()}",
+            onContinue: () async {
+              await AuthService.removeToken();
+              if (!mounted) return;
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginSignupPage()),
+                (route) => false,
+              );
+            },
+          ),
+        );
+      } else {
+        showDialog(
+          context: context,
+          builder: (context) => SuccessMessage(
+            message: 'Erreur lors de la demande de suppression :\n${response?['message'] ?? response.toString()}',
+            onContinue: () => Navigator.pop(context),
+          ),
+        );
+      }
+    } catch (e) {
+      Navigator.pop(context); // Fermer loading
+      showDialog(
         context: context,
         builder: (context) => SuccessMessage(
-            message:
-                "Votre demande de suppression de compte a bien été prise en\n compte et sera traitée par le service\n client",
-            onContinue: () => Navigator.pop(context)));
+          message: 'Erreur lors de la demande de suppression :\n${e.toString()}',
+          onContinue: () => Navigator.pop(context),
+        ),
+      );
+    }
   }
 }

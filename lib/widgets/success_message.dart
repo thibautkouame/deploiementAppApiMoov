@@ -63,7 +63,7 @@ class SuccessMessage extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ButtonWidget(
-                text: 'Continue',
+                text: 'Continuer',
                 onPressed: onContinue,
                 textColor: Colors.white,
               ),

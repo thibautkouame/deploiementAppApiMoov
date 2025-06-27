@@ -51,6 +51,16 @@ class _ProgressScreenState extends State<ProgressScreen> {
     });
   }
 
+  void _navigateToPreviousMonth() {
+    final months = ExerciseHistory.monthToNumber.keys.toList();
+    final currentIndex = months.indexOf(selectedMonth);
+    final prevIndex = (currentIndex - 1 + months.length) % months.length;
+    setState(() {
+      selectedMonth = months[prevIndex];
+      _filterExercisesByMonth(selectedMonth);
+    });
+  }
+
   Future<void> _loadExerciseData() async {
     try {
       final token = await AuthService.getToken();
@@ -381,24 +391,50 @@ class _ProgressScreenState extends State<ProgressScreen> {
                               const SizedBox(height: 30),
                               SizedBox(
                                 width: double.infinity,
-                                child: ElevatedButton(
-                                  onPressed: _navigateToNextMonth,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.primary,
-                                    padding:
-                                        const EdgeInsets.symmetric(vertical: 16),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: ElevatedButton(
+                                        onPressed: _navigateToPreviousMonth,
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: AppColors.primary,
+                                          padding: const EdgeInsets.symmetric(vertical: 16),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          'Mois précédent',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                  child: const Text(
-                                    'Mois suivant',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: ElevatedButton(
+                                        onPressed: _navigateToNextMonth,
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: AppColors.primary,
+                                          padding: const EdgeInsets.symmetric(vertical: 16),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          'Mois suivant',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                  ],
                                 ),
                               ),
                               const SizedBox(height: 20),

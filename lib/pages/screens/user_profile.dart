@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fitness/models/user.dart';
 import 'package:fitness/pages/screens/edit_profile.dart';
+import 'package:fitness/pages/screens/home_screen.dart';
+import 'package:fitness/pages/screens/profile_screen.dart';
 
 class UserProfile extends StatelessWidget {
   final User user;
@@ -97,7 +99,7 @@ class UserProfile extends StatelessWidget {
                         ),
                         onPressed: () {
                           // Action de confirmation
-                          Navigator.pop(context);
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen(selectedIndex: 3)));
                         },
                         child: const Text('Confirmer', style: TextStyle(color: Colors.black)),
                       ),

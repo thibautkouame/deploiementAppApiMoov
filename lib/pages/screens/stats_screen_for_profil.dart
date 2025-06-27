@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:fitness/pages/screens/profile_screen.dart';
 import 'package:fitness/services/stats_service.dart';
 import 'package:fitness/theme/theme.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:fitness/pages/screens/home_screen.dart';
-import 'package:fitness/pages/screens/analysis_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fitness/services/auth_service.dart';
 import 'package:fitness/pages/loginsignup.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:fitness/pages/screens/home_screen.dart';
 
-class StatsScreen extends StatefulWidget {
-  const StatsScreen({super.key});
+class StatsScreenForProfil extends StatefulWidget {
+  const StatsScreenForProfil({super.key});
 
   @override
-  State<StatsScreen> createState() => _StatsScreenState();
+  State<StatsScreenForProfil> createState() => _StatsScreenForProfilState();
 }
 
-class _StatsScreenState extends State<StatsScreen> {
+class _StatsScreenForProfilState extends State<StatsScreenForProfil> {
   Map<String, List<dynamic>> _history = {};
   Map<String, dynamic> _statistics = {};
   bool _isLoading = true;
@@ -187,11 +187,17 @@ class _StatsScreenState extends State<StatsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-               Row( 
+               Row(
                 children: [
                   IconButton(
                     onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => const HomeScreen()));
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const HomeScreen(selectedIndex: 3),
+                        ),
+                        (route) => false,
+                      );
                     },
                     icon: const Icon(Icons.arrow_back),
                   ),

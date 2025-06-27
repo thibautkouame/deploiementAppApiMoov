@@ -69,7 +69,8 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
         });
       }
     } catch (e) {
-      if (e.toString().contains('401') || e.toString().toLowerCase().contains('unauthorized')) {
+      if (e.toString().contains('401') ||
+          e.toString().toLowerCase().contains('unauthorized')) {
         await AuthService.removeToken();
         if (mounted) {
           Navigator.of(context).pushAndRemoveUntil(
@@ -87,14 +88,13 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
     final formattedDate = DateFormat('yyyy-MM-dd').format(selectedDate);
     print('Searching for stats on: $formattedDate');
     print('Available history items: ${exerciseHistory.length}');
-    
+
     try {
-      currentDayExercises = exerciseHistory.where(
-        (stats) {
-          final exerciseDate = DateFormat('yyyy-MM-dd').format(DateTime.parse(stats.date));
-          return exerciseDate == formattedDate;
-        }
-      ).toList();
+      currentDayExercises = exerciseHistory.where((stats) {
+        final exerciseDate =
+            DateFormat('yyyy-MM-dd').format(DateTime.parse(stats.date));
+        return exerciseDate == formattedDate;
+      }).toList();
 
       print('Found ${currentDayExercises.length} exercises for selected date');
 
@@ -133,7 +133,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
         currentDayStats = currentDayExercises[currentExerciseIndex];
         print('Selected exercise stats: ${currentDayStats?.toMap()}');
       }
-      
+
       setState(() {});
     } catch (e) {
       print('Error updating current day stats: $e');
@@ -142,14 +142,21 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
 
   void _nextExercise() {
     setState(() {
-      if (currentDayExercises.length == 1) {
-        // Si c'est un seul exercice, on vide la liste pour afficher le message
-        currentDayExercises = [];
-        currentDayStats = null;
-      } else if (currentDayExercises.length > 1) {
+      if (currentDayExercises.length > 1) {
         currentExerciseIndex = (currentExerciseIndex + 1) % currentDayExercises.length;
         currentDayStats = currentDayExercises[currentExerciseIndex];
       }
+      // Si un seul exercice, ne rien faire (on reste sur le même)
+    });
+  }
+
+  void _previousExercise() {
+    setState(() {
+      if (currentDayExercises.length > 1) {
+        currentExerciseIndex = (currentExerciseIndex - 1 + currentDayExercises.length) % currentDayExercises.length;
+        currentDayStats = currentDayExercises[currentExerciseIndex];
+      }
+      // Si un seul exercice, ne rien faire (on reste sur le même)
     });
   }
 
@@ -161,12 +168,21 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
         children: [
           Row(
             children: [
-              IconButton(onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(builder: (context) => const HomeScreen()));
-              }, icon: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black,)),
+              IconButton(
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => const HomeScreen()));
+                  },
+                  icon: Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    color: Colors.black,
+                  )),
               const SizedBox(width: 10),
               Text(
-                DateFormat('MMMM yyyy', 'fr_FR').format(selectedDate).replaceFirstMapped(RegExp(r'^\w'), (match) => match.group(0)!.toUpperCase()),
+                DateFormat('MMMM yyyy', 'fr_FR')
+                    .format(selectedDate)
+                    .replaceFirstMapped(RegExp(r'^\w'),
+                        (match) => match.group(0)!.toUpperCase()),
                 style: GoogleFonts.poppins(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -174,7 +190,6 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
               ),
             ],
           ),
-          
           Text(
             'Rapport d\'aujourd\'hui',
             style: GoogleFonts.poppins(
@@ -190,7 +205,8 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                 10,
                 (index) {
                   final date = DateTime.now().add(Duration(days: index - 5));
-                  final isSelected = DateFormat('dd', 'fr_FR').format(date) == DateFormat('dd', 'fr_FR').format(selectedDate);
+                  final isSelected = DateFormat('dd', 'fr_FR').format(date) ==
+                      DateFormat('dd', 'fr_FR').format(selectedDate);
                   return GestureDetector(
                     onTap: () {
                       setState(() {
@@ -208,7 +224,9 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                       child: Column(
                         children: [
                           Text(
-                            DateFormat('E', 'fr_FR').format(date)[0].toUpperCase(),
+                            DateFormat('E', 'fr_FR')
+                                .format(date)[0]
+                                .toUpperCase(),
                             style: GoogleFonts.poppins(color: Colors.white),
                           ),
                           Text(
@@ -289,10 +307,15 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Durée de sommeil', style: GoogleFonts.poppins(color: Colors.black, fontSize: 11.5),),
+                            Text(
+                              'Durée de sommeil',
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black, fontSize: 11.5),
+                            ),
                             Text(
                               '${currentDayStats?.sleepHours ?? '0'}H',
-                              style: GoogleFonts.poppins(color: Colors.black, fontSize: 27),
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black, fontSize: 27),
                             ),
                           ],
                         ),
@@ -314,12 +337,17 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                             Row(
                               children: [
                                 Icon(Icons.water_drop, color: Colors.blue),
-                                Text('L\'eau', style: GoogleFonts.poppins(color: Colors.black, fontSize: 11.5),),
+                                Text(
+                                  'L\'eau',
+                                  style: GoogleFonts.poppins(
+                                      color: Colors.black, fontSize: 11.5),
+                                ),
                               ],
                             ),
                             Text(
                               '${double.tryParse(currentDayStats?.waterLiter ?? '0')?.toStringAsFixed(1)}L',
-                              style: GoogleFonts.poppins(color: Colors.black, fontSize: 27),
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black, fontSize: 27),
                             ),
                           ],
                         ),
@@ -344,13 +372,19 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                           children: [
                             Row(
                               children: [
-                                Icon(Icons.local_fire_department, color: Colors.orange),
-                                Text('Calorie \n absorbée', style: GoogleFonts.poppins(color: Colors.black, fontSize: 11.5),),
+                                Icon(Icons.local_fire_department,
+                                    color: Colors.orange),
+                                Text(
+                                  'Calorie \n absorbée',
+                                  style: GoogleFonts.poppins(
+                                      color: Colors.black, fontSize: 11.5),
+                                ),
                               ],
                             ),
                             Text(
                               '${double.tryParse(currentDayStats?.calories ?? '0')?.toStringAsFixed(0)}kcal',
-                              style: GoogleFonts.poppins(color: Colors.black, fontSize: 27),
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black, fontSize: 27),
                             ),
                           ],
                         ),
@@ -370,19 +404,27 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Pression \n artérielle avant', style: GoogleFonts.poppins(color: Colors.black, fontSize: 11.5),),
+                            Text(
+                              'Pression \n artérielle avant',
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black, fontSize: 11.5),
+                            ),
                             Text(
                               currentDayStats?.bloodPressureBefore ?? '0/0',
-                              style: GoogleFonts.poppins(color: Colors.black, fontSize: 27),
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black, fontSize: 27),
                             ),
-                            Text('mmHg', style: GoogleFonts.poppins(color: Colors.black, fontSize: 11.5),),
+                            Text(
+                              'mmHg',
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black, fontSize: 11.5),
+                            ),
                           ],
                         ),
                       ),
               ),
             ],
           ),
-
           const SizedBox(height: 16),
           Row(
             children: [
@@ -400,13 +442,19 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                           children: [
                             Row(
                               children: [
-                                Icon(Icons.local_fire_department, color: Colors.orange),
-                                Text('Pression \n systolique \n avant', style: GoogleFonts.poppins(color: Colors.black, fontSize: 11.5),),
+                                Icon(Icons.local_fire_department,
+                                    color: Colors.orange),
+                                Text(
+                                  'Pression \n systolique \n avant',
+                                  style: GoogleFonts.poppins(
+                                      color: Colors.black, fontSize: 11.5),
+                                ),
                               ],
                             ),
                             Text(
                               '${currentDayStats?.systolicPressureBefore ?? '0'}',
-                              style: GoogleFonts.poppins(color: Colors.black, fontSize: 27),
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black, fontSize: 27),
                             ),
                           ],
                         ),
@@ -426,19 +474,27 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Pression \n diastolique \n avant', style: GoogleFonts.poppins(color: Colors.black, fontSize: 11.5),),
+                            Text(
+                              'Pression \n diastolique \n avant',
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black, fontSize: 11.5),
+                            ),
                             Text(
                               currentDayStats?.diastolicPressureBefore ?? '0',
-                              style: GoogleFonts.poppins(color: Colors.black, fontSize: 27),
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black, fontSize: 27),
                             ),
-                            Text('mmHg', style: GoogleFonts.poppins(color: Colors.black, fontSize: 11.5),),
+                            Text(
+                              'mmHg',
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black, fontSize: 11.5),
+                            ),
                           ],
                         ),
                       ),
               ),
             ],
           ),
-
           const SizedBox(height: 16),
           Row(
             children: [
@@ -456,22 +512,27 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                           children: [
                             Row(
                               children: [
-                                Icon(Icons.local_fire_department, color: Colors.orange),
-                                Text('Sensation avant', style: GoogleFonts.poppins(color: Colors.black, fontSize: 11.5),),
+                                Icon(Icons.local_fire_department,
+                                    color: Colors.orange),
+                                Text(
+                                  'Sensation avant',
+                                  style: GoogleFonts.poppins(
+                                      color: Colors.black, fontSize: 11.5),
+                                ),
                               ],
                             ),
                             Text(
                               currentDayStats?.sensationBefore ?? '0/0',
-                              style: GoogleFonts.poppins(color: Colors.black, fontSize: 15),
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black, fontSize: 15),
                             ),
                           ],
                         ),
                       ),
               ),
-              
             ],
           ),
-           const SizedBox(height: 16),
+          const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
@@ -488,22 +549,26 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                           children: [
                             Row(
                               children: [
-                                Icon(Icons.local_fire_department, color: Colors.orange),
-                                Text('Sensation après', style: GoogleFonts.poppins(color: Colors.black, fontSize: 11.5),),
+                                Icon(Icons.local_fire_department,
+                                    color: Colors.orange),
+                                Text(
+                                  'Sensation après',
+                                  style: GoogleFonts.poppins(
+                                      color: Colors.black, fontSize: 11.5),
+                                ),
                               ],
                             ),
                             Text(
                               currentDayStats?.sensationAfter ?? '0/0',
-                              style: GoogleFonts.poppins(color: Colors.black, fontSize: 15),
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black, fontSize: 15),
                             ),
                           ],
                         ),
                       ),
               ),
-              
             ],
           ),
-
           const SizedBox(height: 16),
           Row(
             children: [
@@ -520,12 +585,21 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Fréquence \n cardiaque avant', style: GoogleFonts.poppins(color: Colors.black, fontSize: 11.5),),
+                            Text(
+                              'Fréquence \n cardiaque avant',
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black, fontSize: 11.5),
+                            ),
                             Text(
                               currentDayStats?.heartRateBefore ?? '0/0',
-                              style: GoogleFonts.poppins(color: Colors.black, fontSize: 27),
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black, fontSize: 27),
                             ),
-                            Text('bpm', style: GoogleFonts.poppins(color: Colors.black, fontSize: 11.5),),
+                            Text(
+                              'bpm',
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black, fontSize: 11.5),
+                            ),
                           ],
                         ),
                       ),
@@ -537,14 +611,13 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
     );
   }
 
-
   Widget _buildPostExerciseIndicators() {
     return Container(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-Text(
+          Text(
             'Indicateurs Pendant l\'exercice',
             style: GoogleFonts.poppins(
               fontSize: 16,
@@ -565,10 +638,15 @@ Text(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Sensation pendant', style: GoogleFonts.poppins(color: Colors.black, fontSize: 11.5),),
+                            Text(
+                              'Sensation pendant',
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black, fontSize: 11.5),
+                            ),
                             Text(
                               currentDayStats?.sensationDuring ?? '0/0',
-                              style: GoogleFonts.poppins(color: Colors.black, fontSize: 27),
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black, fontSize: 27),
                             ),
                           ],
                         ),
@@ -599,16 +677,21 @@ Text(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(' Durée(min)', style: GoogleFonts.poppins(color: Colors.black, fontSize: 11.5),),
                             Text(
-                              _formatDuration(currentDayStats?.duration ?? '00:00'),
-                              style: GoogleFonts.poppins(color: Colors.black, fontSize: 27),
+                              ' Durée(min)',
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black, fontSize: 11.5),
+                            ),
+                            Text(
+                              _formatDuration(
+                                  currentDayStats?.duration ?? '00:00'),
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black, fontSize: 27),
                             ),
                           ],
                         ),
                       ),
               ),
-              
             ],
           ),
           const SizedBox(height: 16),
@@ -628,19 +711,24 @@ Text(
                           children: [
                             Row(
                               children: [
-                                Icon(Icons.local_fire_department, color: Colors.orange),
-                                Text('Calories \n brûlées', style: GoogleFonts.poppins(color: Colors.black, fontSize: 11.5),),
+                                Icon(Icons.local_fire_department,
+                                    color: Colors.orange),
+                                Text(
+                                  'Calories \n brûlées',
+                                  style: GoogleFonts.poppins(
+                                      color: Colors.black, fontSize: 11.5),
+                                ),
                               ],
                             ),
                             Text(
                               '${double.tryParse(currentDayStats?.caloriesBurned ?? '0')?.toStringAsFixed(0)}kcal',
-                              style: GoogleFonts.poppins(color: Colors.black, fontSize: 27),
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black, fontSize: 27),
                             ),
                           ],
                         ),
                       ),
               ),
-             
             ],
           ),
           const SizedBox(height: 16),
@@ -660,13 +748,19 @@ Text(
                           children: [
                             Row(
                               children: [
-                                Icon(Icons.local_fire_department, color: Colors.orange),
-                                Text('Pression \n systolique \n après', style: GoogleFonts.poppins(color: Colors.black, fontSize: 11.5),),
+                                Icon(Icons.local_fire_department,
+                                    color: Colors.orange),
+                                Text(
+                                  'Pression \n systolique \n après',
+                                  style: GoogleFonts.poppins(
+                                      color: Colors.black, fontSize: 11.5),
+                                ),
                               ],
                             ),
                             Text(
                               '${currentDayStats?.systolicPressureAfter ?? '0'}',
-                              style: GoogleFonts.poppins(color: Colors.black, fontSize: 27),
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black, fontSize: 27),
                             ),
                           ],
                         ),
@@ -686,19 +780,27 @@ Text(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Pression \n diastolique \n après', style: GoogleFonts.poppins(color: Colors.black, fontSize: 11.5),),
+                            Text(
+                              'Pression \n diastolique \n après',
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black, fontSize: 11.5),
+                            ),
                             Text(
                               currentDayStats?.diastolicPressureAfter ?? '0',
-                              style: GoogleFonts.poppins(color: Colors.black, fontSize: 27),
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black, fontSize: 27),
                             ),
-                            Text('mmHg', style: GoogleFonts.poppins(color: Colors.black, fontSize: 11.5),),
+                            Text(
+                              'mmHg',
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black, fontSize: 11.5),
+                            ),
                           ],
                         ),
                       ),
               ),
             ],
           ),
-
           const SizedBox(height: 16),
           Row(
             children: [
@@ -710,17 +812,25 @@ Text(
                         decoration: BoxDecoration(
                           color: Colors.orange.shade100,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.grey.shade300),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Pression \n artérielle après', style: GoogleFonts.poppins(color: Colors.black, fontSize: 11.5),),
+                            Text(
+                              'Pression \n artérielle après',
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black, fontSize: 11.5),
+                            ),
                             Text(
                               currentDayStats?.bloodPressureAfter ?? '0/0',
-                              style: GoogleFonts.poppins(color: Colors.black, fontSize: 27),
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black, fontSize: 27),
                             ),
-                            Text('mmHg', style: GoogleFonts.poppins(color: Colors.black, fontSize: 11.5),),
+                            Text(
+                              'mmHg',
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black, fontSize: 11.5),
+                            ),
                           ],
                         ),
                       ),
@@ -728,7 +838,7 @@ Text(
             ],
           ),
           const SizedBox(height: 16),
-           Row(
+          Row(
             children: [
               Expanded(
                 child: isLoading
@@ -743,12 +853,21 @@ Text(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Fréquence \n cardiaque après', style: GoogleFonts.poppins(color: Colors.black, fontSize: 11.5),),
+                            Text(
+                              'Fréquence \n cardiaque après',
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black, fontSize: 11.5),
+                            ),
                             Text(
                               currentDayStats?.heartRateAfter ?? '0/0',
-                              style: GoogleFonts.poppins(color: Colors.black, fontSize: 27),
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black, fontSize: 27),
                             ),
-                            Text('mmHg', style: GoogleFonts.poppins(color: Colors.black, fontSize: 11.5),),
+                            Text(
+                              'mmHg',
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black, fontSize: 11.5),
+                            ),
                           ],
                         ),
                       ),
@@ -778,7 +897,7 @@ Text(
                   padding: const EdgeInsets.all(16),
                   child: Center(
                     child: Text(
-                      'Il n\'y a plus d\'exercice pour ce jour',
+                      'Aucun exercice pour ce jour',
                       style: GoogleFonts.poppins(
                         fontSize: 16,
                         color: Colors.grey,
@@ -787,23 +906,61 @@ Text(
                     ),
                   ),
                 ),
-              if (currentDayExercises.isNotEmpty)
+              if (currentDayExercises.length == 1 && !isLoading)
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
-                  child: ElevatedButton(
-                    onPressed: isLoading ? null : _nextExercise,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  child: Center(
+                    child: Text(
+                      'Il n\'y a qu\'un seul exercice pour ce jour',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                    child: Text(
-                      currentDayExercises.length > 1 ? 'Exercice suivant' : 'Exercice suivant',
-                      style: GoogleFonts.poppins(color: Colors.black),
-                    ),
+                  ),
+                ),
+              if (currentDayExercises.length > 1 && !isLoading)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: isLoading ? null : _previousExercise,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            'Exercice précédent',
+                            style: GoogleFonts.poppins(color: Colors.black, fontSize: 11),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: isLoading ? null : _nextExercise,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            'Exercice suivant',
+                            style: GoogleFonts.poppins(color: Colors.black, fontSize: 11),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               if (currentDayExercises.length > 1)
@@ -821,17 +978,17 @@ Text(
       ),
     );
   }
-} 
+}
 
- String _formatDuration(String duration) {
-    final parts = duration.split(":");
-    if (parts.length == 2) {
-      final hours = int.tryParse(parts[0]) ?? 0;
-      final minutes = int.tryParse(parts[1]) ?? 0;
-      String result = "";
-      if (hours > 0) result += "${hours}h ";
-      if (minutes > 0 || hours == 0) result += "${minutes}min";
-      return result.trim();
-    }
-    return duration;
+String _formatDuration(String duration) {
+  final parts = duration.split(":");
+  if (parts.length == 2) {
+    final hours = int.tryParse(parts[0]) ?? 0;
+    final minutes = int.tryParse(parts[1]) ?? 0;
+    String result = "";
+    if (hours > 0) result += "${hours}h ";
+    if (minutes > 0 || hours == 0) result += "${minutes}min";
+    return result.trim();
   }
+  return duration;
+}

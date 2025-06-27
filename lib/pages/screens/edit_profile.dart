@@ -1,11 +1,10 @@
-import 'package:fitness/pages/screens/home_screen.dart';
+import 'package:fitness/pages/screens/user_profile.dart';
 import 'package:fitness/widgets/success_message.dart';
 import 'package:flutter/material.dart';
 import 'package:fitness/models/user.dart';
 import 'package:fitness/services/auth_service.dart';
 import 'package:fitness/theme/theme.dart';
 import 'package:fitness/pages/screens/profile_screen.dart';
-import 'package:fitness/pages/welcome.dart';
 import 'package:fitness/pages/loginsignup.dart';
 
 class EditProfile extends StatefulWidget {
@@ -116,7 +115,7 @@ class _EditProfileState extends State<EditProfile> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const HomeScreen()),
+                      builder: (context) => UserProfile(user: _user!)),
                 );
               },
             );
